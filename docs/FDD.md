@@ -52,7 +52,7 @@ O desafio técnico é **emitir um evento externo a partir dessa transação** se
 | Múltiplos workers | [09:13] Diego |
 | Arquivamento de linhas após ~30 dias | [09:08] Diego |
 | Evento na **criação** do pedido (`create()`, `order.service.ts:95-113`) | decisão R3 do [RFC](RFC.md) |
-| Endpoint para **listar** a DLQ (a reunião só definiu o replay por id; ver §13) | [09:18] Diego |
+| Endpoint para **listar** a DLQ (a reunião só definiu o replay por id; questão em aberto Q6 do [RFC](RFC.md#5-questões-em-aberto)) | [09:18] Diego |
 
 ## 4. Modelo de dados
 
@@ -201,7 +201,7 @@ sequenceDiagram
         W->>DB: UPDATE status=PROCESSING (ids do lote)
         loop para cada evento, em ordem de createdAt
             W->>DB: carrega webhook_endpoint (ativo? secret)
-            W->>W: corpo = JSON(payload); checa 64 KB; X-Signature = HMAC-SHA256(secret, corpo)
+            W->>W: corpo = JSON(payload); checa 64 KB; X-Timestamp = now; X-Signature = HMAC-SHA256(secret, X-Timestamp + "." + corpo)
             W->>CL: POST url (timeout 10 s)
             alt 2xx
                 W->>DB: status=DELIVERED, deliveredAt, attempts+1 · INSERT webhook_deliveries(success)
@@ -509,8 +509,8 @@ X-Signature: sha256=5d7f0b6c1e...a9
 | Item | Semântica |
 |---|---|
 | `timestamp` (payload) | Momento da mudança de status, gravado no snapshot ([09:52] Larissa) |
-| `X-Timestamp` | Momento do **envio**. Muda a cada tentativa e serve para o cliente detectar replay ([09:44] Diego) |
-| `X-Signature` | `sha256=` + HMAC-SHA256 em hexadecimal, calculado sobre **os bytes exatos do corpo** ([09:22] Sofia). O prefixo é *proposta*. Durante a rotação, leva duas assinaturas separadas por vírgula (§5.5). |
+| `X-Timestamp` | Momento do **envio**. Muda a cada tentativa e serve para o cliente detectar replay ([09:44] Diego). **Faz parte da string assinada**, então não pode ser alterado sem invalidar a assinatura |
+| `X-Signature` | `sha256=` + HMAC-SHA256 em hexadecimal de **`<X-Timestamp>.<bytes exatos do corpo>`**. O corpo inteiro continua assinado, como definido em [09:22] Sofia, e o timestamp de envio é prefixado a ele *(proposta, ver §10)*. O prefixo `sha256=` também é *proposta*. Durante a rotação, leva duas assinaturas separadas por vírgula (§5.5). |
 | `X-Event-Id` | Igual em todas as tentativas e no replay. É a chave de deduplicação ([09:25] Diego) |
 | Sem `items` | O cliente consulta `GET /api/v1/orders/:id` se precisar dos itens ([09:43] Diego) |
 | `order_number` | Formato `ORD-000123`, gerado por `reserveOrderNumber` (`order.service.ts:245-254`) |
@@ -592,12 +592,12 @@ A reunião só fixou o uso do **Pino** existente ([09:29] Bruno). Métricas e tr
 
 ## 10. Segurança
 
-- **HMAC-SHA256** do corpo, com `node:crypto` (sem dependência nova). A comparação de assinaturas, nos testes e na documentação para clientes, deve usar `timingSafeEqual` *(proposta)*. Ver [ADR-004](adrs/ADR-004-hmac-sha256-com-secret-por-endpoint.md).
+- **HMAC-SHA256** de `<X-Timestamp>.<corpo>`, com `node:crypto` (sem dependência nova). A comparação de assinaturas, nos testes e na documentação para clientes, deve usar `timingSafeEqual` *(proposta)*. Ver [ADR-004](adrs/ADR-004-hmac-sha256-com-secret-por-endpoint.md).
 - **Geração da secret** com `crypto.randomBytes(32)`, prefixada com `whsec_` *(proposta)*.
 - **Armazenamento da secret** *(ponto para a revisão da Sofia, AMB-07)*. Ela precisa ser recuperável para assinar, então não dá para guardar só um hash. Nesta fase, a secret fica em coluna própria, nunca é devolvida depois da criação ou da rotação, e o logger a mascara. A criptografia em repouso fica para decisão na revisão de segurança ([09:46] Sofia).
 - **`https` obrigatório** no schema Zod ([09:23] Sofia).
 - **Replay** restrito a `ADMIN` e auditado ([09:36] Sofia).
-- **Ponto de atenção para a revisão:** o `X-Timestamp` não entra na assinatura, porque a reunião definiu o HMAC "sobre o corpo" ([09:22] Sofia). Sem essa inclusão, o header não impede que um terceiro reenvie uma requisição capturada. O corpo já contém `timestamp` e `event_id`, o que mitiga em parte.
+- **Timestamp dentro da assinatura** *(proposta, sujeita à revisão da Sofia, [09:46] Sofia)*. A reunião definiu o HMAC "sobre o corpo" ([09:22] Sofia) e o `X-Timestamp` como forma de o cliente detectar replay ([09:44] Diego). Com o timestamp fora da assinatura, um terceiro poderia reenviar uma requisição capturada trocando o header. A proposta é assinar `<X-Timestamp>.<corpo>`, que mantém o corpo inteiro assinado e amarra o timestamp a ele. O cliente rejeita envios com `X-Timestamp` fora de uma janela de tolerância (sugestão para o portal: 5 min) e deduplica por `X-Event-Id`.
 - **Autorização do CRUD:** hoje qualquer usuário autenticado gerencia webhooks de qualquer customer, porque `User` não tem relação com `Customer` (`prisma/schema.prisma:25-38`) e o endurecimento foi adiado ([09:37] Sofia).
 
 ## 11. Integração com o sistema existente
@@ -649,14 +649,14 @@ A reunião só fixou o uso do **Pino** existente ([09:29] Bruno). Métricas e tr
 | `changeStatus` fica mais lento | Baixa | Médio | Uma consulta indexada (`customerId, active`) e N inserts, sem I/O externo ([09:04] Bruno) |
 | Crescimento contínuo da outbox e das deliveries | Alta | Baixo | Índices por status. O arquivamento fica fora desta fase ([09:08] Diego) |
 | CRUD sem vínculo usuário ↔ customer | Média | Médio | Escopo aceito por enquanto ([09:37] Sofia). Registrado como Q4 do RFC |
-| Admin sem forma de descobrir ids da DLQ (não há endpoint de listagem) | Alta | Baixo | Consulta direta ao banco nesta fase *(proposta)*. Candidato a endpoint na próxima fase |
+| Admin sem forma de descobrir ids da DLQ (não há endpoint de listagem) | Alta | Baixo | Consulta direta ao banco nesta fase *(proposta)*. Registrado como Q6 do RFC |
 
 ## 14. Plano de testes
 
 | Nível | Caso | Referência |
 |---|---|---|
 | Unit | Tabela de backoff: o `attempts` 1..5 dá o `nextAttemptAt` correto e o 6 vai para a DLQ | §5.3 |
-| Unit | `sign(secret, body)` bate com um vetor conhecido de HMAC-SHA256; durante a rotação gera duas assinaturas | §5.5 |
+| Unit | `sign(secret, timestamp, body)` bate com um vetor conhecido de HMAC-SHA256 sobre `<timestamp>.<body>`; alterar o timestamp ou o corpo invalida a assinatura; durante a rotação gera duas assinaturas | §5.5, §10 |
 | Unit | Filtro: um endpoint que não ouve `to` não recebe linha | [09:34] Bruno |
 | Integração | `PATCH /orders/:id/status` com um webhook interessado cria 1 linha `PENDING` com o snapshot correto | `tests/orders.test.ts` |
 | Integração | A inserção na outbox falha (mock) e a ordem continua no status anterior, sem history novo | [09:40] Bruno |
@@ -671,7 +671,7 @@ A reunião só fixou o uso do **Pino** existente ([09:29] Bruno). Métricas e tr
 - [ ] Uma mudança de status com webhook interessado gera uma linha de outbox **na mesma transação**. Uma falha nessa inserção desfaz a mudança.
 - [ ] Nenhum evento é gerado para endpoints que não ouvem o `to_status`, nem para endpoints inativos ou removidos.
 - [ ] Com o worker rodando, um evento `PENDING` é enviado em ≤ 2 s após o commit, sem contar o tempo de resposta do cliente.
-- [ ] A requisição de saída tem o payload de §6.8 e os headers `Content-Type`, `X-Event-Id`, `X-Webhook-Id`, `X-Timestamp` e `X-Signature`, com a assinatura válida.
+- [ ] A requisição de saída tem o payload de §6.8 e os headers `Content-Type`, `X-Event-Id`, `X-Webhook-Id`, `X-Timestamp` e `X-Signature`, com a assinatura válida sobre `<X-Timestamp>.<corpo>`.
 - [ ] O timeout de 10 s e as respostas fora de 2xx geram retry com 1m/5m/30m/2h/12h. Depois do 6º envio, o evento vai para `webhook_dead_letter`.
 - [ ] Um payload acima de 64 KB não é enviado e vai para a DLQ com `WEBHOOK_PAYLOAD_TOO_LARGE`.
 - [ ] O replay exige `ADMIN`, devolve o evento à outbox com o mesmo `eventId` e registra `userId` no log.

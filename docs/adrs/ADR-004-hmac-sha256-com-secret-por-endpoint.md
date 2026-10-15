@@ -19,6 +19,8 @@ Os webhooks levam dados de pedidos para endpoints fora da nossa infraestrutura. 
 
 Complementos que **não são decisões arquiteturais** e aparecem aqui só como contexto: URL obrigatoriamente `https`, validada no schema Zod ([09:23] Sofia), e o header `X-Timestamp`, que permite ao cliente detectar replay attack se quiser ([09:44] Diego).
 
+> **Complemento de design (revisão desta documentação, 2026-10-15, sujeito à revisão da Sofia):** para que o `X-Timestamp` realmente impeça replay, a string assinada passa a ser `<X-Timestamp>.<corpo>`. O corpo continua integralmente assinado, como decidido. A diferença é que o timestamp de envio fica amarrado à assinatura. Detalhes no [FDD §10](../FDD.md#10-segurança).
+
 ## Alternativas Consideradas
 
 | Alternativa | Por que foi descartada |

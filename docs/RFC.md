@@ -59,7 +59,7 @@ flowchart LR
 2. **O que é gravado.** Um **snapshot** do pedido no momento da mudança, enxuto e sem itens. Só se grava para os webhooks que **escolheram ouvir aquele status**: o filtro é aplicado na inserção. → [ADR-007](adrs/ADR-007-payload-snapshot-e-filtro-na-insercao.md)
 3. **Entrega (Worker).** É um processo Node separado da API, com PrismaClient próprio e o mesmo banco. Ele faz polling a cada 2 s e processa os pendentes em ordem de criação, com **uma única instância**. → [ADR-002](adrs/ADR-002-worker-separado-em-polling.md)
 4. **Falhas.** Timeout de 10 s. Até 5 retentativas, após 1 min, 5 min, 30 min, 2 h e 12 h. Depois disso, o evento vai para a DLQ em tabela própria, com replay manual restrito a ADMIN e auditado. → [ADR-003](adrs/ADR-003-retry-backoff-e-dlq.md)
-5. **Autenticidade.** Assinatura HMAC-SHA256 do corpo, com uma secret por endpoint gerada pela plataforma. A secret pode ser rotacionada, e a anterior continua válida por 24 h. Só se aceitam URLs `https`. → [ADR-004](adrs/ADR-004-hmac-sha256-com-secret-por-endpoint.md)
+5. **Autenticidade.** Assinatura HMAC-SHA256 do corpo (com o `X-Timestamp` de envio prefixado, *proposta* para a revisão de segurança), com uma secret por endpoint gerada pela plataforma. A secret pode ser rotacionada, e a anterior continua válida por 24 h. Só se aceitam URLs `https`. → [ADR-004](adrs/ADR-004-hmac-sha256-com-secret-por-endpoint.md)
 6. **Semântica de entrega.** At-least-once. Cada evento leva um `X-Event-Id` (UUID) para o cliente deduplicar. → [ADR-005](adrs/ADR-005-entrega-at-least-once-com-x-event-id.md)
 7. **Gestão pelo cliente.** O cliente cria, edita, remove e lista webhooks e consulta o histórico de entregas pela API existente, autenticado com JWT. Os contratos dos endpoints ficam no [FDD](FDD.md#6-contratos-públicos).
 8. **Padrões.** O módulo `src/modules/webhooks` (a criar) replica a estrutura dos módulos atuais e reusa `AppError`, o middleware de erro, `requireRole`, Zod e Pino. Os códigos de erro usam o prefixo `WEBHOOK_`. → [ADR-006](adrs/ADR-006-reuso-dos-padroes-do-projeto.md)
@@ -95,6 +95,7 @@ flowchart LR
 | Q3 | **Avisar o cliente por email** quando o webhook dele falha repetidamente | Próxima fase, depois de medir o impacto. | [09:37] Marcos, [09:37] Larissa |
 | Q4 | **Endurecer as permissões do CRUD de webhooks** (hoje vale qualquer usuário autenticado) | "Mais pra frente". Hoje o código não liga `User` a `Customer` (`prisma/schema.prisma`). | [09:37] Sofia |
 | Q5 | **Arquivamento** das linhas já entregues (~30 dias) | Fora do escopo desta feature, sem dono definido. | [09:08] Diego |
+| Q6 | **Listagem da DLQ:** o replay é por id ([09:18] Diego), mas não foi definido como o ADMIN descobre os ids | Nesta fase, consulta direta ao banco. Definir um endpoint de listagem na próxima fase. | [09:18] Diego, [09:35] Diego |
 
 ### 5.1 Ambiguidades da reunião resolvidas nesta revisão
 
@@ -138,4 +139,4 @@ flowchart LR
 
 ---
 
-**Como revisar:** comente diretamente nas seções 3 a 5. As questões Q1 a Q5 podem seguir em aberto nesta entrega. As definições R1 a R3 podem ser contestadas na revisão.
+**Como revisar:** comente diretamente nas seções 3 a 5. As questões Q1 a Q6 podem seguir em aberto nesta entrega. As definições R1 a R3 podem ser contestadas na revisão.
