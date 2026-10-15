@@ -37,7 +37,7 @@ Para os clientes, "tempo real" é qualquer coisa abaixo de 10 segundos ([09:02] 
 **Negativas**
 - Consultas ao banco a cada 2 s, mesmo sem eventos novos (custo baixo graças aos índices em `status` e `created_at`).
 - O single-worker limita a vazão e é um ponto único de falha: se o worker cair, as entregas atrasam até ele voltar (os eventos não se perdem, ficam na outbox).
-- Ordem garantida só por pedido. Os clientes não pediram ordem global ([09:14] Marcos).
+- Ordem garantida só por pedido. Os clientes não pediram ordem global ([09:14] Marcos). Com retries ([ADR-003](ADR-003-retry-backoff-e-dlq.md)), a garantia vale só para a primeira tentativa: um evento em backoff pode ser ultrapassado por eventos posteriores do mesmo pedido ([FDD §8](../FDD.md#8-estratégias-de-resiliência)).
 - Um novo processo para implantar e monitorar.
 
 **Trade-off explícito:** aceita-se uma latência de até 2 s e uma vazão limitada a um worker, em troca de **simplicidade operacional e ordem por pedido sem coordenação distribuída**. Escalar horizontalmente continua como questão em aberto.

@@ -6,7 +6,7 @@
 | **Status** | Em revisão |
 | **Data** | 2026-10-15 (consolida a reunião técnica de quinta-feira, 09:00) |
 | **Revisores** | Marcos (PM), Bruno (Eng. Pleno, Pedidos), Diego (Eng. Sênior, Plataforma), Sofia (Eng. de Segurança) |
-| **Documentos relacionados** | [ADRs](adrs/README.md) |
+| **Documentos relacionados** | [FDD](FDD.md) · [ADRs](adrs/README.md) |
 
 ---
 
@@ -61,7 +61,7 @@ flowchart LR
 4. **Falhas.** Timeout de 10 s. Até 5 retentativas, após 1 min, 5 min, 30 min, 2 h e 12 h. Depois disso, o evento vai para a DLQ em tabela própria, com replay manual restrito a ADMIN e auditado. → [ADR-003](adrs/ADR-003-retry-backoff-e-dlq.md)
 5. **Autenticidade.** Assinatura HMAC-SHA256 do corpo, com uma secret por endpoint gerada pela plataforma. A secret pode ser rotacionada, e a anterior continua válida por 24 h. Só se aceitam URLs `https`. → [ADR-004](adrs/ADR-004-hmac-sha256-com-secret-por-endpoint.md)
 6. **Semântica de entrega.** At-least-once. Cada evento leva um `X-Event-Id` (UUID) para o cliente deduplicar. → [ADR-005](adrs/ADR-005-entrega-at-least-once-com-x-event-id.md)
-7. **Gestão pelo cliente.** O cliente cria, edita, remove e lista webhooks e consulta o histórico de entregas pela API existente, autenticado com JWT. Os contratos dos endpoints ficam no FDD.
+7. **Gestão pelo cliente.** O cliente cria, edita, remove e lista webhooks e consulta o histórico de entregas pela API existente, autenticado com JWT. Os contratos dos endpoints ficam no [FDD](FDD.md#6-contratos-públicos).
 8. **Padrões.** O módulo `src/modules/webhooks` (a criar) replica a estrutura dos módulos atuais e reusa `AppError`, o middleware de erro, `requireRole`, Zod e Pino. Os códigos de erro usam o prefixo `WEBHOOK_`. → [ADR-006](adrs/ADR-006-reuso-dos-padroes-do-projeto.md)
 
 ### 3.3 Garantias e limitações, declaradas
@@ -71,7 +71,7 @@ flowchart LR
 | Consistência status ↔ evento | Forte (mesma transação) |
 | Entrega | At-least-once (podem ocorrer duplicatas) |
 | Latência de descoberta | ≤ 2 s após o commit, sem contar o tempo de resposta do cliente |
-| Ordem | Apenas **por pedido** e apenas enquanto houver **um único worker**. Não há ordem global ([09:13] Larissa) |
+| Ordem | Apenas **por pedido**, enquanto houver **um único worker** e **na primeira tentativa**: um evento em retry pode ser ultrapassado por eventos posteriores ([FDD §8](FDD.md#8-estratégias-de-resiliência)). Não há ordem global ([09:13] Larissa) |
 | Janela de retentativa | ~15 h; depois disso, DLQ |
 
 ## 4. Alternativas consideradas
@@ -95,6 +95,8 @@ flowchart LR
 | Q3 | **Avisar o cliente por email** quando o webhook dele falha repetidamente | Próxima fase, depois de medir o impacto. | [09:37] Marcos, [09:37] Larissa |
 | Q4 | **Endurecer as permissões do CRUD de webhooks** (hoje vale qualquer usuário autenticado) | "Mais pra frente". Hoje o código não liga `User` a `Customer` (`prisma/schema.prisma`). | [09:37] Sofia |
 | Q5 | **Arquivamento** das linhas já entregues (~30 dias) | Fora do escopo desta feature, sem dono definido. | [09:08] Diego |
+| Q6 | **Listagem da DLQ:** o replay é por id ([09:18] Diego), mas não foi definido como o ADMIN descobre os ids | Nesta fase, consulta direta ao banco. Definir um endpoint de listagem na próxima fase. | [09:18] Diego, [09:35] Diego |
+| Q7 | **Incluir o `X-Timestamp` na assinatura?** Com o HMAC só sobre o corpo, o header não impede replay de uma requisição capturada | Pendente da revisão de segurança. Recomendação: assinar `<X-Timestamp>.<corpo>` (ver [FDD §10](FDD.md#10-segurança)). Dona: Sofia. | [09:22] Sofia, [09:44] Diego, [09:46] Sofia |
 
 ### 5.1 Ambiguidades da reunião resolvidas nesta revisão
 
@@ -106,17 +108,13 @@ flowchart LR
 
 ## 6. Impacto e riscos
 
-**Impacto no sistema existente**
-- **`changeStatus`:** ganha uma consulta e uma inserção dentro da transação. É a única mudança no fluxo atual de pedidos.
-- **Dados:** novas tabelas no MySQL existente, com IDs UUID como o resto do schema ([09:51] Larissa).
-- **Operação:** um processo novo (`npm run worker`) para implantar e monitorar.
-- **Contrato com clientes:** novos endpoints sob a API autenticada atual. Os clientes precisam validar HMAC e deduplicar eventos, e o portal do desenvolvedor vai documentar isso em destaque ([09:26] Marcos).
+**Impacto no sistema existente:** a única mudança no fluxo de pedidos é uma consulta e uma inserção a mais na transação de `changeStatus`. Fora isso, entram tabelas novas no MySQL e um processo novo (`npm run worker`). Os clientes passam a validar HMAC e deduplicar eventos, o que será documentado no portal ([09:26] Marcos). O detalhe está em [FDD §11 e §12](FDD.md#11-integração-com-o-sistema-existente).
 
 **Riscos principais**
 
 | Risco | Mitigação | Origem |
 |---|---|---|
-| Worker parado → entregas atrasam (single-worker é ponto único de falha) | Eventos persistem na outbox e nada se perde: o worker retoma de onde parou. Monitorar o tamanho da fila de pendentes (*proposta*, ver Observabilidade no FDD). | [09:11] Diego, [09:13] Larissa |
+| Worker parado → entregas atrasam (single-worker é ponto único de falha) | Eventos persistem na outbox e nada se perde: o worker retoma de onde parou. Monitorar o tamanho da fila de pendentes (*proposta*, ver [Observabilidade no FDD](FDD.md#9-observabilidade)). | [09:11] Diego, [09:13] Larissa |
 | Cliente não deduplica → processa eventos em dobro | Documentação em destaque no portal. `X-Event-Id` estável entre as tentativas. | [09:25] Sofia, [09:26] Marcos |
 | Vazamento de secret de cliente (já aconteceu) | Secret por endpoint, rotação com 24 h de carência, revisão de segurança de 2 dias da Sofia. | [09:22] Diego, [09:21] Sofia, [09:46] Sofia |
 | Inserção na outbox falha → mudança de status falha | Comportamento desejado: rollback garante que não exista status sem evento. | [09:40] Bruno, [09:41] Diego |
@@ -138,4 +136,4 @@ flowchart LR
 
 ---
 
-**Como revisar:** comente diretamente nas seções 3 a 5. As questões Q1 a Q5 podem seguir em aberto nesta entrega. As definições R1 a R3 podem ser contestadas na revisão.
+**Como revisar:** comente diretamente nas seções 3 a 5. As questões Q1 a Q6 podem seguir em aberto nesta entrega. A Q7 deve ser resolvida na revisão de segurança, antes do deploy. As definições R1 a R3 podem ser contestadas na revisão.

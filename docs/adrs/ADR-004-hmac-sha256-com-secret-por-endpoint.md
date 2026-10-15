@@ -36,6 +36,7 @@ Complementos que **não são decisões arquiteturais** e aparecem aqui só como 
 - A plataforma passa a guardar segredos de clientes. Como armazená-los e como mantê-los fora dos logs (o `redact` atual em `src/shared/logger/index.ts` não cobre `secret`) ficou para o FDD e para a revisão da Sofia. Ver AMB-07 no inventário.
 - Durante as 24 h de rotação, duas secrets valem ao mesmo tempo. O design precisa definir como o cliente distingue qual secret assinou a mensagem.
 - Validar a assinatura passa a ser responsabilidade do cliente.
+- Como o `X-Timestamp` não entra na assinatura, ele não impede replay de uma requisição capturada. Incluí-lo altera esta decisão e ficou para a revisão da Sofia ([Q7 do RFC](../RFC.md#5-questões-em-aberto)).
 
 **Trade-off explícito:** aceita-se a complexidade de gerenciar uma secret por endpoint, com rotação e convivência temporária, em troca de **isolar o impacto de vazamentos**, um risco que já aconteceu na prática.
 
