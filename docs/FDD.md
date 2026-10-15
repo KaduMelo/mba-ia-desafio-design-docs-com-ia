@@ -5,7 +5,7 @@
 | **Status** | Pronto para implementação |
 | **Data** | 2026-10-15 |
 | **Base** | Reunião técnica de quinta-feira, 09:00 ([`TRANSCRICAO.md`](../TRANSCRICAO.md)) e código atual do OMS |
-| **Documentos relacionados** | [PRD](PRD.md) · [RFC](RFC.md) · [ADRs](adrs/README.md) |
+| **Documentos relacionados** | [PRD](PRD.md) · [RFC](RFC.md) · [ADRs](adrs/README.md) · [Tracker](TRACKER.md) |
 
 > **Convenção deste documento.** As justificativas das decisões estão nos ADRs e não se repetem aqui.
 > Itens marcados com ***(proposta)*** são detalhes de implementação que a reunião não fixou. Eles foram

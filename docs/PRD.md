@@ -7,7 +7,7 @@
 | **Status** | Escopo aprovado na reunião ([09:48] Larissa; confirmações em [09:49]) |
 | **Data** | 2026-10-15 (base: reunião técnica de quinta-feira, 09:00) |
 | **Prazo alvo** | Fim de novembro, em 3 sprints ([09:45] Marcos, [09:47] Larissa) |
-| **Documentos relacionados** | [RFC](RFC.md) · [FDD](FDD.md) · [ADRs](adrs/README.md) |
+| **Documentos relacionados** | [RFC](RFC.md) · [FDD](FDD.md) · [ADRs](adrs/README.md) · [Tracker](TRACKER.md) |
 
 > Este documento responde **por que** e **o quê**. A arquitetura está no [RFC](RFC.md), as decisões estão nos
 > [ADRs](adrs/README.md) e o "como construir" está no [FDD](FDD.md). Itens marcados com ***(proposta)*** não foram
