@@ -5,4 +5,4 @@ Registre aqui cada correção relevante feita sobre o que a IA gerou. Vira a se�
 
 | # | Fase | O que a IA gerou de errado/superficial | Como detectei | Correção (prompt ou edição) |
 |---|------|----------------------------------------|---------------|-----------------------------|
-| 1 |      |                                        |               |                             |
+| 1 | 0 | O inventário citava `src/worker.ts` e `src/modules/webhooks/` ao lado de arquivos reais, o que poderia levar o Tracker a marcá-los como Fonte = CODIGO, mas eles ainda não existem | Script de validação (regex de timestamps/falantes + `os.path.exists` nos caminhos) apontou 3 caminhos inexistentes; os 237 timestamps estavam válidos | Nota no topo do INVENTARIO: arquivos propostos na reunião têm origem TRANSCRICAO, nunca CODIGO |
