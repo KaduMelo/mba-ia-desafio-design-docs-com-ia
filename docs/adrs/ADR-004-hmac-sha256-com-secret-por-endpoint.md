@@ -19,8 +19,6 @@ Os webhooks levam dados de pedidos para endpoints fora da nossa infraestrutura. 
 
 Complementos que **não são decisões arquiteturais** e aparecem aqui só como contexto: URL obrigatoriamente `https`, validada no schema Zod ([09:23] Sofia), e o header `X-Timestamp`, que permite ao cliente detectar replay attack se quiser ([09:44] Diego).
 
-> **Complemento de design (revisão desta documentação, 2026-10-15, sujeito à revisão da Sofia):** para que o `X-Timestamp` realmente impeça replay, a string assinada passa a ser `<X-Timestamp>.<corpo>`. O corpo continua integralmente assinado, como decidido. A diferença é que o timestamp de envio fica amarrado à assinatura. Detalhes no [FDD §10](../FDD.md#10-segurança).
-
 ## Alternativas Consideradas
 
 | Alternativa | Por que foi descartada |
@@ -38,6 +36,7 @@ Complementos que **não são decisões arquiteturais** e aparecem aqui só como 
 - A plataforma passa a guardar segredos de clientes. Como armazená-los e como mantê-los fora dos logs (o `redact` atual em `src/shared/logger/index.ts` não cobre `secret`) ficou para o FDD e para a revisão da Sofia. Ver AMB-07 no inventário.
 - Durante as 24 h de rotação, duas secrets valem ao mesmo tempo. O design precisa definir como o cliente distingue qual secret assinou a mensagem.
 - Validar a assinatura passa a ser responsabilidade do cliente.
+- Como o `X-Timestamp` não entra na assinatura, ele não impede replay de uma requisição capturada. Incluí-lo altera esta decisão e ficou para a revisão da Sofia ([Q7 do RFC](../RFC.md#5-questões-em-aberto)).
 
 **Trade-off explícito:** aceita-se a complexidade de gerenciar uma secret por endpoint, com rotação e convivência temporária, em troca de **isolar o impacto de vazamentos**, um risco que já aconteceu na prática.
 
