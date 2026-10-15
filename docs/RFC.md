@@ -6,7 +6,7 @@
 | **Status** | Em revisão |
 | **Data** | 2026-10-15 (consolida a reunião técnica de quinta-feira, 09:00) |
 | **Revisores** | Marcos (PM), Bruno (Eng. Pleno, Pedidos), Diego (Eng. Sênior, Plataforma), Sofia (Eng. de Segurança) |
-| **Documentos relacionados** | [ADRs](adrs/README.md) |
+| **Documentos relacionados** | [FDD](FDD.md) · [ADRs](adrs/README.md) |
 
 ---
 
@@ -61,7 +61,7 @@ flowchart LR
 4. **Falhas.** Timeout de 10 s. Até 5 retentativas, após 1 min, 5 min, 30 min, 2 h e 12 h. Depois disso, o evento vai para a DLQ em tabela própria, com replay manual restrito a ADMIN e auditado. → [ADR-003](adrs/ADR-003-retry-backoff-e-dlq.md)
 5. **Autenticidade.** Assinatura HMAC-SHA256 do corpo, com uma secret por endpoint gerada pela plataforma. A secret pode ser rotacionada, e a anterior continua válida por 24 h. Só se aceitam URLs `https`. → [ADR-004](adrs/ADR-004-hmac-sha256-com-secret-por-endpoint.md)
 6. **Semântica de entrega.** At-least-once. Cada evento leva um `X-Event-Id` (UUID) para o cliente deduplicar. → [ADR-005](adrs/ADR-005-entrega-at-least-once-com-x-event-id.md)
-7. **Gestão pelo cliente.** O cliente cria, edita, remove e lista webhooks e consulta o histórico de entregas pela API existente, autenticado com JWT. Os contratos dos endpoints ficam no FDD.
+7. **Gestão pelo cliente.** O cliente cria, edita, remove e lista webhooks e consulta o histórico de entregas pela API existente, autenticado com JWT. Os contratos dos endpoints ficam no [FDD](FDD.md#6-contratos-públicos).
 8. **Padrões.** O módulo `src/modules/webhooks` (a criar) replica a estrutura dos módulos atuais e reusa `AppError`, o middleware de erro, `requireRole`, Zod e Pino. Os códigos de erro usam o prefixo `WEBHOOK_`. → [ADR-006](adrs/ADR-006-reuso-dos-padroes-do-projeto.md)
 
 ### 3.3 Garantias e limitações, declaradas
@@ -71,7 +71,7 @@ flowchart LR
 | Consistência status ↔ evento | Forte (mesma transação) |
 | Entrega | At-least-once (podem ocorrer duplicatas) |
 | Latência de descoberta | ≤ 2 s após o commit, sem contar o tempo de resposta do cliente |
-| Ordem | Apenas **por pedido** e apenas enquanto houver **um único worker**. Não há ordem global ([09:13] Larissa) |
+| Ordem | Apenas **por pedido**, enquanto houver **um único worker** e **na primeira tentativa**: um evento em retry pode ser ultrapassado por eventos posteriores ([FDD §8](FDD.md#8-estratégias-de-resiliência)). Não há ordem global ([09:13] Larissa) |
 | Janela de retentativa | ~15 h; depois disso, DLQ |
 
 ## 4. Alternativas consideradas
@@ -116,7 +116,7 @@ flowchart LR
 
 | Risco | Mitigação | Origem |
 |---|---|---|
-| Worker parado → entregas atrasam (single-worker é ponto único de falha) | Eventos persistem na outbox e nada se perde: o worker retoma de onde parou. Monitorar o tamanho da fila de pendentes (*proposta*, ver Observabilidade no FDD). | [09:11] Diego, [09:13] Larissa |
+| Worker parado → entregas atrasam (single-worker é ponto único de falha) | Eventos persistem na outbox e nada se perde: o worker retoma de onde parou. Monitorar o tamanho da fila de pendentes (*proposta*, ver [Observabilidade no FDD](FDD.md#9-observabilidade)). | [09:11] Diego, [09:13] Larissa |
 | Cliente não deduplica → processa eventos em dobro | Documentação em destaque no portal. `X-Event-Id` estável entre as tentativas. | [09:25] Sofia, [09:26] Marcos |
 | Vazamento de secret de cliente (já aconteceu) | Secret por endpoint, rotação com 24 h de carência, revisão de segurança de 2 dias da Sofia. | [09:22] Diego, [09:21] Sofia, [09:46] Sofia |
 | Inserção na outbox falha → mudança de status falha | Comportamento desejado: rollback garante que não exista status sem evento. | [09:40] Bruno, [09:41] Diego |

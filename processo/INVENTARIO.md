@@ -207,17 +207,17 @@ Convenção de IDs: `DEC` decisão · `RF` requisito funcional · `RNF` requisit
 | ID | Ambiguidade | Evidência | Origem |
 |----|-------------|-----------|--------|
 | AMB-01 | **"5 tentativas" com 5 intervalos**: 1 envio + 5 retries (6 chamadas) ou 5 chamadas no total? A soma de ~15h só fecha com 5 intervalos após a 1ª falha **Resolvido (2026-10-15):** 1 envio + 5 retries. | "teto de tentativas" e "5" vs. lista de 5 intervalos e "~15 horas entre primeira falha e última tentativa" | [09:15] Diego, [09:17] Diego, [09:48] Larissa |
-| AMB-02 | Status "falhou" na outbox coexistindo com a DLQ separada: significa "falhou, aguardando retry"? | Lista de status vs. DLQ em tabela própria | [09:08] Diego, [09:18] Diego |
+| AMB-02 | Status "falhou" na outbox coexistindo com a DLQ separada: significa "falhou, aguardando retry"? **Proposta no FDD §4:** `FAILED` = estado terminal na outbox; evidência na DLQ. | Lista de status vs. DLQ em tabela própria | [09:08] Diego, [09:18] Diego |
 | AMB-03 | **Uma linha na outbox por evento ou por (evento × webhook)?** O cliente pode ter vários cadastros (`X-Webhook-Id`) e o filtro é por webhook **Resolvido (2026-10-15):** 1 linha por evento × webhook. | Filtro "se nenhum webhook do customer quer" + header por webhook + event_id "único por evento" | [09:25] Diego, [09:34] Bruno, [09:44] Sofia |
 | AMB-04 | A **criação do pedido** (`null → PENDING`) gera evento? A reunião só fala de `changeStatus` **Resolvido (2026-10-15):** não gera evento nesta fase. | `create()` grava history sem passar por `changeStatus` | `src/modules/orders/order.service.ts:95-113`, [09:40] Bruno |
 | AMB-05 | **Vínculo usuário ↔ customer** não existe no código: qualquer usuário autenticado pode gerenciar webhooks de qualquer customer | Coerente com DEC-27 e OPEN-04, mas precisa estar explícito como risco | `prisma/schema.prisma:25-38`, [09:32] Marcos, [09:37] Sofia |
-| AMB-06 | `customer_id` no **body ou no path**: não foi escolhido | "passado no body ou no path" | [09:32] Larissa |
-| AMB-07 | Como a secret é **armazenada e protegida** (inclusive dos logs) não foi discutido; houve caso de vazamento em log de cliente | Redact atual do Pino não inclui `secret` | [09:22] Diego, `src/shared/logger/index.ts:4-11` |
-| AMB-08 | `WEBHOOK_SECRET_REQUIRED` foi citado como exemplo, mas a secret é gerada pela plataforma: em que caso ocorre? | Exemplo "etc." | [09:28] Bruno, [09:31] Marcos |
-| AMB-09 | **Respostas 2xx = sucesso?** Quais status do cliente contam como falha (4xx também retenta?) | Só o timeout foi definido como falha | [09:42] Diego |
-| AMB-10 | Métricas e tracing **não foram discutidos**; só existe Pino | Qualquer métrica no FDD é proposta | [09:29] Bruno, `src/shared/logger/index.ts` |
-| AMB-11 | Deliveries "últimos 100": limite fixo ou paginação? | Só "últimos 100" | [09:34] Marcos |
-| AMB-12 | Onde os 64KB são verificados (na inserção na outbox, que roda dentro do `changeStatus`, ou no envio)? Se for na inserção, o erro derruba a mudança de status | "a gente não envia" / "erro caso ultrapasse" | [09:23] Sofia, [09:24] Larissa |
+| AMB-06 | `customer_id` no **body ou no path**: não foi escolhido **Proposta no FDD §6:** body na criação, path na listagem. | "passado no body ou no path" | [09:32] Larissa |
+| AMB-07 | Como a secret é **armazenada e protegida** (inclusive dos logs) não foi discutido; houve caso de vazamento em log de cliente **Proposta no FDD §10:** coluna própria, nunca devolvida após criação, mascarada no logger; criptografia em repouso para a revisão da Sofia. | Redact atual do Pino não inclui `secret` | [09:22] Diego, `src/shared/logger/index.ts:4-11` |
+| AMB-08 | `WEBHOOK_SECRET_REQUIRED` foi citado como exemplo, mas a secret é gerada pela plataforma: em que caso ocorre? **Proposta no FDD §7:** erro do worker quando o endpoint está sem secret válida → DLQ. | Exemplo "etc." | [09:28] Bruno, [09:31] Marcos |
+| AMB-09 | **Respostas 2xx = sucesso?** Quais status do cliente contam como falha (4xx também retenta?) **Proposta no FDD §5.3:** qualquer resposta fora de 2xx retenta. | Só o timeout foi definido como falha | [09:42] Diego |
+| AMB-10 | Métricas e tracing **não foram discutidos**; só existe Pino **Proposta no FDD §9:** métricas via logs/SQL e correlação por IDs, sem infra nova. | Qualquer métrica no FDD é proposta | [09:29] Bruno, `src/shared/logger/index.ts` |
+| AMB-11 | Deliveries "últimos 100": limite fixo ou paginação? **Proposta no FDD §6.6:** últimas 100, sem paginação. | Só "últimos 100" | [09:34] Marcos |
+| AMB-12 | Onde os 64KB são verificados (na inserção na outbox, que roda dentro do `changeStatus`, ou no envio)? Se for na inserção, o erro derruba a mudança de status **Proposta no FDD §7:** checagem no worker; excedeu → DLQ sem retry. | "a gente não envia" / "erro caso ultrapasse" | [09:23] Sofia, [09:24] Larissa |
 
 ---
 
