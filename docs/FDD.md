@@ -632,7 +632,7 @@ A reunião só fixou o uso do **Pino** existente ([09:29] Bruno). Métricas e tr
 | Risco | Prob. | Impacto | Mitigação |
 |---|---|---|---|
 | Eventos fora de ordem quando há retry (§8) | Média | Médio | `timestamp` no payload e documentação no portal. Reavaliar junto com a Q2 do RFC. |
-| Vazamento da secret armazenada | Baixa | Alto | Secret por endpoint, mascaramento no logger, rotação com carência e revisão da Sofia ([09:46] Sofia) |
+| Vazamento da secret **armazenada na plataforma** (o vazamento do lado do cliente está no [PRD](PRD.md#10-riscos-e-mitigação)) | Baixa | Alto | Secret por endpoint, mascaramento no logger, rotação com carência e revisão da Sofia ([09:46] Sofia) |
 | Worker parado sem ninguém perceber | Média | Alto | Métrica de idade do pendente mais antigo e logs `worker_cycle` *(proposta)*. Nenhum evento se perde ([09:11] Diego) |
 | `changeStatus` fica mais lento | Baixa | Médio | Uma consulta indexada (`customerId, active`) e N inserts, sem I/O externo ([09:04] Bruno) |
 | Crescimento contínuo da outbox e das deliveries | Alta | Baixo | Índices por status. O arquivamento fica fora desta fase ([09:08] Diego) |

@@ -149,8 +149,8 @@ O O5 não teve meta definida na reunião, mas mede o problema descrito em [09:00
 |---|---|---|---|---|
 | Atraso na entrega e perda da Atlas para um concorrente | Média | Alto | Escopo enxuto (email, dashboard e rate limiting fora), estimativa de 3 sprints e prazo confirmado com os clientes | [09:00] Marcos, [09:46] Larissa, [09:47] Marcos |
 | Cliente processa notificações duplicadas porque não deduplica | Média | Médio | Identificador de evento estável e documentação em destaque no portal | [09:25] Sofia, [09:26] Marcos |
-| Vazamento da secret de um cliente | Média (já aconteceu) | Alto | Secret por webhook, rotação com 24 h de carência e revisão de segurança antes do deploy | [09:22] Diego, [09:21] Sofia, [09:46] Sofia |
-| Processo de envio parado → notificações atrasam | Baixa | Alto | As notificações ficam guardadas e saem quando o processo volta. Monitorar a fila *(proposta)* | [09:11] Diego, [09:13] Larissa |
+| Vazamento da secret **do lado do cliente** (ex.: em log da aplicação dele) | Média (já aconteceu) | Alto | Secret por webhook, rotação com 24 h de carência e revisão de segurança antes do deploy | [09:22] Diego, [09:21] Sofia, [09:46] Sofia |
+| Processo de envio parado → notificações atrasam | Média | Alto | As notificações ficam guardadas e saem quando o processo volta. Monitorar a fila *(proposta)* | [09:11] Diego, [09:13] Larissa |
 | Volume alto de notificações para um mesmo cliente (ex.: 50 por minuto) | Média | Médio | Observar em produção. Rate limiting é questão em aberto | [09:38] Diego, [09:39] Larissa |
 | Qualquer usuário autenticado gerencia webhooks de qualquer customer | Média | Médio | Aceito por enquanto. Endurecimento previsto para depois (Q4 do [RFC](RFC.md#5-questões-em-aberto)) | [09:37] Sofia |
 
