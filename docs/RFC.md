@@ -108,11 +108,7 @@ flowchart LR
 
 ## 6. Impacto e riscos
 
-**Impacto no sistema existente**
-- **`changeStatus`:** ganha uma consulta e uma inserção dentro da transação. É a única mudança no fluxo atual de pedidos.
-- **Dados:** novas tabelas no MySQL existente, com IDs UUID como o resto do schema ([09:51] Larissa).
-- **Operação:** um processo novo (`npm run worker`) para implantar e monitorar.
-- **Contrato com clientes:** novos endpoints sob a API autenticada atual. Os clientes precisam validar HMAC e deduplicar eventos, e o portal do desenvolvedor vai documentar isso em destaque ([09:26] Marcos).
+**Impacto no sistema existente:** a única mudança no fluxo de pedidos é uma consulta e uma inserção a mais na transação de `changeStatus`. Fora isso, entram tabelas novas no MySQL e um processo novo (`npm run worker`). Os clientes passam a validar HMAC e deduplicar eventos, o que será documentado no portal ([09:26] Marcos). O detalhe está em [FDD §11 e §12](FDD.md#11-integração-com-o-sistema-existente).
 
 **Riscos principais**
 

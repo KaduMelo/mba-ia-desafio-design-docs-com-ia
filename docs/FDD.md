@@ -231,12 +231,19 @@ sequenceDiagram
 | 5 | now + 12 h |
 | 6 | **sem retry → DLQ (§5.4)** |
 
-Depois de cada falha, a linha volta a `PENDING` com o `nextAttemptAt` acima e `lastErrorCode` preenchido. Contam como falha:
-- **timeout de 10 s** ([09:42] Diego);
-- erro de rede;
-- **qualquer resposta fora de 2xx**. *Proposta, resolve AMB-09: a reunião só definiu o timeout. Tratar 4xx como retentável cobre erros de configuração que o cliente corrige dentro da janela de ~15 h.*
+Depois de cada falha **retentável**, a linha volta a `PENDING` com o `nextAttemptAt` acima e `lastErrorCode` preenchido. A reunião só definiu o timeout como falha ([09:42] Diego). A classificação abaixo é *proposta (resolve AMB-09)* e segue o padrão de mercado: só se retenta o que pode se resolver sozinho.
 
-**Falhas sem retry**, porque são determinísticas *(proposta)*:
+| Resultado do envio | Tratamento | Código |
+|---|---|---|
+| 2xx | `DELIVERED` | — |
+| Timeout de 10 s | Retry | `WEBHOOK_DELIVERY_TIMEOUT` |
+| Erro de rede (DNS, conexão recusada, TLS) | Retry | `WEBHOOK_NETWORK_ERROR` |
+| 5xx, 408 (Request Timeout), 429 (Too Many Requests) | Retry | `WEBHOOK_DELIVERY_FAILED` |
+| Demais 4xx e 3xx (redirects não são seguidos) | **DLQ imediata**, sem retry | `WEBHOOK_DELIVERY_REJECTED` |
+
+Um 4xx (exceto 408 e 429) indica que o cliente recusou a requisição: URL errada, autenticação do lado dele ou payload inválido para ele. Repetir a mesma requisição não muda o resultado. O evento vai para a DLQ e pode ser reprocessado por um ADMIN depois que o cliente corrigir a configuração (§5.4).
+
+**Outras falhas sem retry**, porque são determinísticas *(proposta)*:
 - `WEBHOOK_PAYLOAD_TOO_LARGE`;
 - `WEBHOOK_INACTIVE`;
 - `WEBHOOK_SECRET_REQUIRED`.
@@ -344,7 +351,7 @@ HTTP/1.1 200 OK
 }
 ```
 
-O formato `{ data, pagination }` reaproveita `paginated()` (`src/shared/http/response.ts:22`). Status: **200**, **400** (`customerId` não é UUID), **401**, **404** (`WEBHOOK_CUSTOMER_NOT_FOUND`). Webhooks com `deletedAt` não aparecem.
+Cada item é o **objeto Webhook**, sem `secret`, que também é a resposta de §6.3. O formato `{ data, pagination }` reaproveita `paginated()` (`src/shared/http/response.ts:22`). Status: **200**, **400** (`customerId` não é UUID), **401**, **404** (`WEBHOOK_CUSTOMER_NOT_FOUND`). Webhooks com `deletedAt` não aparecem.
 
 ### 6.3 `PATCH /api/v1/webhooks/:id`: editar webhook
 
@@ -360,16 +367,7 @@ Content-Type: application/json
 ```http
 HTTP/1.1 200 OK
 
-{
-  "id": "b8f1d3a2-6c4e-4f1a-8d2b-9e7c5a3f1b04",
-  "customerId": "7d0c6f2e-3b1a-4c8e-9f4d-2a6b8e1c5d33",
-  "url": "https://hooks.atlascomercial.com.br/oms",
-  "events": ["PAID", "SHIPPED", "DELIVERED", "CANCELLED"],
-  "active": true,
-  "previousSecretExpiresAt": null,
-  "createdAt": "2026-11-03T14:02:11.120Z",
-  "updatedAt": "2026-11-05T09:40:00.000Z"
-}
+{ "id": "b8f1d3a2-…", "events": ["PAID", "SHIPPED", "DELIVERED", "CANCELLED"], "active": true, "updatedAt": "2026-11-05T09:40:00.000Z", "…": "demais campos do objeto Webhook (§6.2)" }
 ```
 
 Status: **200**, **400** (`VALIDATION_ERROR`: body vazio, url não-https ou filtro inválido), **401**, **404** (`WEBHOOK_NOT_FOUND`, inclusive para webhook removido). A mudança de filtro vale para os **próximos** eventos. Os que já estão na outbox não são afetados ([ADR-007](adrs/ADR-007-payload-snapshot-e-filtro-na-insercao.md)).
@@ -433,18 +431,7 @@ HTTP/1.1 200 OK
       "payload": { "event_id": "e3a9c4d1-7b2f-4e6a-9c8d-5f1b2a3c4d6e", "event_type": "order.status_changed", "...": "ver §6.8" },
       "createdAt": "2026-11-05T10:01:03.412Z"
     },
-    {
-      "id": "9a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
-      "eventId": "e3a9c4d1-7b2f-4e6a-9c8d-5f1b2a3c4d6e",
-      "attempt": 1,
-      "success": false,
-      "responseStatus": null,
-      "responseBody": null,
-      "durationMs": 10000,
-      "errorCode": "WEBHOOK_DELIVERY_TIMEOUT",
-      "payload": { "...": "mesmo snapshot" },
-      "createdAt": "2026-11-05T10:00:03.100Z"
-    }
+    { "id": "9a1b2c3d-…", "eventId": "e3a9c4d1-…", "attempt": 1, "success": false, "responseStatus": null, "responseBody": null, "durationMs": 10000, "errorCode": "WEBHOOK_DELIVERY_TIMEOUT", "payload": { "…": "mesmo snapshot" }, "createdAt": "2026-11-05T10:00:03.100Z" }
   ]
 }
 ```
@@ -537,7 +524,8 @@ As classes ficam em `src/shared/errors/http-errors.ts`, ao lado de `InvalidStatu
 | Código | Retentável | Quando | Origem |
 |---|---|---|---|
 | `WEBHOOK_DELIVERY_TIMEOUT` | Sim | Sem resposta em 10 s | [09:42] Diego |
-| `WEBHOOK_DELIVERY_FAILED` | Sim | Resposta fora de 2xx | *(proposta, AMB-09)* |
+| `WEBHOOK_DELIVERY_FAILED` | Sim | Resposta 5xx, 408 ou 429 | *(proposta, AMB-09)* |
+| `WEBHOOK_DELIVERY_REJECTED` | Não → DLQ | Resposta 3xx ou 4xx (exceto 408 e 429): o cliente recusou a requisição | *(proposta, AMB-09)* |
 | `WEBHOOK_NETWORK_ERROR` | Sim | DNS, conexão recusada, TLS | *(proposta)* |
 | `WEBHOOK_MAX_ATTEMPTS_EXCEEDED` | Não → DLQ | Falha no 6º envio | [09:17] Larissa |
 | `WEBHOOK_PAYLOAD_TOO_LARGE` | Não → DLQ | Corpo serializado acima de 64 KB. A checagem fica no worker, não na transação, para que um payload grande não bloqueie a mudança de status (*proposta, resolve AMB-12*) | [09:23] Sofia, [09:24] Larissa |
@@ -661,7 +649,7 @@ A reunião só fixou o uso do **Pino** existente ([09:29] Bruno). Métricas e tr
 | Integração | `PATCH /orders/:id/status` com um webhook interessado cria 1 linha `PENDING` com o snapshot correto | `tests/orders.test.ts` |
 | Integração | A inserção na outbox falha (mock) e a ordem continua no status anterior, sem history novo | [09:40] Bruno |
 | Integração | Sem webhook interessado, nenhuma linha é criada | [09:34] Bruno |
-| Integração | Worker com servidor HTTP local: 200 → `DELIVERED`; 500 → retry em +1 min; atraso de 11 s → `WEBHOOK_DELIVERY_TIMEOUT` | §5.2 |
+| Integração | Worker com servidor HTTP local: 200 → `DELIVERED`; 500 e 429 → retry em +1 min; 404 → DLQ imediata com `WEBHOOK_DELIVERY_REJECTED`; atraso de 11 s → `WEBHOOK_DELIVERY_TIMEOUT` | §5.2 |
 | Integração | Seis falhas levam a `FAILED` + linha na DLQ; replay como `OPERATOR` → 403; como `ADMIN` → 202 com o mesmo `eventId` | §5.4 |
 | Contrato | `POST /webhooks` com `http://` → 400; a secret só aparece em 201 e no rotate | §6 |
 | Segurança | Revisão manual da Sofia sobre HMAC e geração de secret, com **2 dias úteis** antes do deploy | [09:46] Sofia |
@@ -672,7 +660,7 @@ A reunião só fixou o uso do **Pino** existente ([09:29] Bruno). Métricas e tr
 - [ ] Nenhum evento é gerado para endpoints que não ouvem o `to_status`, nem para endpoints inativos ou removidos.
 - [ ] Com o worker rodando, um evento `PENDING` é enviado em ≤ 2 s após o commit, sem contar o tempo de resposta do cliente.
 - [ ] A requisição de saída tem o payload de §6.8 e os headers `Content-Type`, `X-Event-Id`, `X-Webhook-Id`, `X-Timestamp` e `X-Signature`, com a assinatura válida sobre o corpo.
-- [ ] O timeout de 10 s e as respostas fora de 2xx geram retry com 1m/5m/30m/2h/12h. Depois do 6º envio, o evento vai para `webhook_dead_letter`.
+- [ ] Timeout de 10 s, erro de rede e respostas 5xx, 408 e 429 geram retry com 1m/5m/30m/2h/12h. Outras respostas 3xx e 4xx vão direto para a DLQ. Depois do 6º envio, o evento vai para `webhook_dead_letter`.
 - [ ] Um payload acima de 64 KB não é enviado e vai para a DLQ com `WEBHOOK_PAYLOAD_TOO_LARGE`.
 - [ ] O replay exige `ADMIN`, devolve o evento à outbox com o mesmo `eventId` e registra `userId` no log.
 - [ ] A rotação mantém a secret anterior válida por 24 h, com duas assinaturas em `X-Signature`.
