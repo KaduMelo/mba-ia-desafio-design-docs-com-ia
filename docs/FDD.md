@@ -41,17 +41,12 @@ O desafio técnico é **emitir um evento externo a partir dessa transação** se
 - replay de DLQ por ADMIN;
 - assinatura HMAC e headers de entrega.
 
-**Excluído nesta fase:**
+**Excluído nesta fase.** O que está fora do produto (inbound, email, dashboard, rate limiting, arquivamento, ordem global, exactly-once) está listado no [PRD §5.2](PRD.md#52-fora-de-escopo). Aqui ficam só as exclusões **técnicas**:
 
 | Item | Origem |
 |---|---|
-| Webhooks inbound | [09:02] Marcos |
-| Email de alerta ao cliente | [09:37] Larissa |
-| Dashboard visual | [09:40] Larissa |
-| Rate limiting de saída (observar) | [09:39] Larissa |
-| Múltiplos workers | [09:13] Diego |
-| Arquivamento de linhas após ~30 dias | [09:08] Diego |
-| Evento na **criação** do pedido (`create()`, `order.service.ts:95-113`) | decisão R3 do [RFC](RFC.md) |
+| Múltiplos workers em paralelo | [09:13] Diego |
+| Evento na **criação** do pedido (`create()`, `order.service.ts:95-113`) | [09:40] Bruno (escopo restrito a `changeStatus`); decisão R3 do [RFC](RFC.md#51-ambiguidades-da-reunião-resolvidas-nesta-revisão) |
 | Endpoint para **listar** a DLQ (a reunião só definiu o replay por id; questão em aberto Q6 do [RFC](RFC.md#5-questões-em-aberto)) | [09:18] Diego |
 
 ## 4. Modelo de dados
@@ -193,7 +188,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    participant W as worker (src/worker.ts → webhook.processor.ts)
+    participant W as worker (src/worker.ts → webhook.processor.ts, a criar)
     participant DB as MySQL
     participant CL as Endpoint do cliente
     loop a cada 2 s
@@ -608,16 +603,16 @@ A reunião só fixou o uso do **Pino** existente ([09:29] Bruno). Métricas e tr
 | 14 | `src/config/env.ts` | Mesmo `DATABASE_URL` e `LOG_LEVEL` ([09:30] Bruno). Nenhuma variável nova é obrigatória: intervalos, lote e timeout são constantes do módulo *(proposta)*. |
 | 15 | `src/shared/logger/index.ts` | Mesmo `logger` na API e no worker. Acrescentar `*.secret` e `*.previousSecret` em `redactPaths` (linhas 4–11). |
 | 16 | `src/shared/http/response.ts` | `paginated()` (linha 22) na listagem de webhooks. |
-| 17 | `package.json` | Novos scripts: `"worker": "tsx watch --env-file=.env src/worker.ts"` e `"start:worker": "node --env-file=.env dist/worker.js"`, no mesmo padrão de `dev` e `start` (linhas 11–13) ([09:11] Larissa). `uuid` (linha 32) é reaproveitado. |
+| 17 | `package.json` | Novos scripts: `"worker": "tsx watch --env-file=.env src/worker.ts"` (entry-point a criar) e `"start:worker": "node --env-file=.env dist/worker.js"`, no mesmo padrão de `dev` e `start` (linhas 11–13) ([09:11] Larissa). `uuid` (linha 32) é reaproveitado. |
 | 18 | `tests/setup.ts` | Incluir `webhookDelivery`, `webhookDeadLetter`, `webhookOutbox` e `webhookEndpoint` no `deleteMany` do `beforeEach` (linhas 8–16), **antes** de `customer`, por causa da FK. |
 | 19 | `tests/orders.test.ts` | Novos casos ao lado de "transitions PENDING -> PAID" (linha 59). Ver §14. |
 
 **Arquivos novos** *(a criar)*, na estrutura de `src/modules/orders/` ([09:27] Bruno):
-- `src/modules/webhooks/webhook.controller.ts`, `webhook.service.ts`, `webhook.repository.ts`, `webhook.routes.ts` e `webhook.schemas.ts`;
-- `src/modules/webhooks/webhook.publisher.ts`, que contém `publishWebhookEvent`;
-- `src/modules/webhooks/webhook.processor.ts`, com a lógica do worker. *O nome `.processor` foi escolhido entre as duas opções citadas em [09:28] Bruno*;
-- `src/modules/webhooks/webhook.signature.ts`;
-- `src/worker.ts`.
+- *(a criar)* `src/modules/webhooks/webhook.controller.ts`, `webhook.service.ts`, `webhook.repository.ts`, `webhook.routes.ts` e `webhook.schemas.ts`;
+- *(a criar)* `src/modules/webhooks/webhook.publisher.ts`, que contém `publishWebhookEvent`;
+- *(a criar)* `src/modules/webhooks/webhook.processor.ts`, com a lógica do worker. *O nome `.processor` foi escolhido entre as duas opções citadas em [09:28] Bruno*;
+- *(a criar)* `src/modules/webhooks/webhook.signature.ts`;
+- *(a criar)* `src/worker.ts`.
 
 ## 12. Dependências e compatibilidade
 

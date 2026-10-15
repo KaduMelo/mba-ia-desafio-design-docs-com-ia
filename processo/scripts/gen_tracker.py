@@ -303,7 +303,6 @@ for i, (txt, loc) in enumerate(AC, 1):
 
 OVERRIDE = {
     'PRD-OUT-08': ('TRANSCRICAO', '[09:40] Bruno'),
-    'FDD-OUT-07': ('TRANSCRICAO', '[09:40] Bruno'),
     'ADR-005-ALT-02': ('TRANSCRICAO', '[09:24] Diego'),
     'ADR-006-COD-01': ('CODIGO', 'src/modules/orders/'),
 }

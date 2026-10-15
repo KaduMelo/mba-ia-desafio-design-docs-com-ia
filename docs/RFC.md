@@ -14,7 +14,7 @@
 
 Propomos que o OMS **notifique clientes B2B por webhook (HTTP outbound)** sempre que o status de um pedido mudar, com latência abaixo de 10 segundos.
 
-A mudança de status passa a gravar o evento numa **tabela outbox no MySQL, na mesma transação**. Um **worker em processo separado** lê essa tabela a cada 2 s e entrega o evento. A entrega é **assinada com HMAC-SHA256**, usando uma secret por endpoint. Falhas são retentadas **5 vezes com backoff exponencial** (até ~15 h) e depois vão para uma **DLQ** que pode ser reprocessada manualmente por um ADMIN.
+A mudança de status passa a gravar o evento numa **tabela outbox no MySQL, na mesma transação**. Um **worker em processo separado** lê essa tabela a cada 2 s e entrega o evento. A entrega é **assinada com HMAC-SHA256**, usando uma secret por endpoint. Falhas transitórias são retentadas **5 vezes com backoff exponencial** (até ~15 h). Esgotadas as tentativas, ou diante de uma falha definitiva (ex.: 4xx), o evento vai para uma **DLQ** que pode ser reprocessada manualmente por um ADMIN.
 
 A garantia é **at-least-once**: o cliente deduplica pelo `X-Event-Id`. Não há infraestrutura nova, e o módulo segue os padrões já existentes no código. A estimativa é de **3 sprints**, incluindo a revisão de segurança.
 
@@ -58,7 +58,7 @@ flowchart LR
 1. **Registro do evento (Outbox).** Dentro da transação de `changeStatus`, a função `publishWebhookEvent(tx, order, fromStatus, toStatus)` grava o evento na `webhook_outbox`. Se essa gravação falhar, a mudança de status é desfeita. → [ADR-001](adrs/ADR-001-outbox-no-mysql.md)
 2. **O que é gravado.** Um **snapshot** do pedido no momento da mudança, enxuto e sem itens. Só se grava para os webhooks que **escolheram ouvir aquele status**: o filtro é aplicado na inserção. → [ADR-007](adrs/ADR-007-payload-snapshot-e-filtro-na-insercao.md)
 3. **Entrega (Worker).** É um processo Node separado da API, com PrismaClient próprio e o mesmo banco. Ele faz polling a cada 2 s e processa os pendentes em ordem de criação, com **uma única instância**. → [ADR-002](adrs/ADR-002-worker-separado-em-polling.md)
-4. **Falhas.** Timeout de 10 s. Até 5 retentativas, após 1 min, 5 min, 30 min, 2 h e 12 h. Depois disso, o evento vai para a DLQ em tabela própria, com replay manual restrito a ADMIN e auditado. → [ADR-003](adrs/ADR-003-retry-backoff-e-dlq.md)
+4. **Falhas.** Timeout de 10 s. Falhas transitórias têm até 5 retentativas, após 1 min, 5 min, 30 min, 2 h e 12 h. Depois disso, ou de imediato em falhas definitivas como respostas 4xx, o evento vai para a DLQ em tabela própria, com replay manual restrito a ADMIN e auditado. → [ADR-003](adrs/ADR-003-retry-backoff-e-dlq.md)
 5. **Autenticidade.** Assinatura HMAC-SHA256 do corpo, com uma secret por endpoint gerada pela plataforma. A secret pode ser rotacionada, e a anterior continua válida por 24 h. Só se aceitam URLs `https`. → [ADR-004](adrs/ADR-004-hmac-sha256-com-secret-por-endpoint.md)
 6. **Semântica de entrega.** At-least-once. Cada evento leva um `X-Event-Id` (UUID) para o cliente deduplicar. → [ADR-005](adrs/ADR-005-entrega-at-least-once-com-x-event-id.md)
 7. **Gestão pelo cliente.** O cliente cria, edita, remove e lista webhooks e consulta o histórico de entregas pela API existente, autenticado com JWT. Os contratos dos endpoints ficam no [FDD](FDD.md#6-contratos-públicos).
