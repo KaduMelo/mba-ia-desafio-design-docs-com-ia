@@ -63,7 +63,9 @@ def locate(text):
 ROWS = []
 
 
-def add(id_, doc, tipo, resumo, fonte=None, loc=None, src_text=''):
+def add(id_, doc, tipo, resumo, fonte=None, loc=None, src_text='', raw=''):
+    if 'proposta' in (resumo + ' ' + src_text + ' ' + raw).lower():
+        tipo = f'{tipo} — proposta'
     if fonte is None:
         fonte, loc = locate(src_text)
     ROWS.append([id_, doc, tipo, clean(resumo), fonte, loc])
@@ -108,16 +110,9 @@ for i, row in enumerate(t, 1):
     add(f'PRD-DEC-{i:02d}', PRD, 'Decisão / Trade-off', f'{row[0]} — {row[1]}', src_text=DEC_LOC[i - 1])
 from_table(PRD, '9. Dependências', 'PRD-DEP', 'Dependência', lambda r: f'{r[0]} ({r[1]})')
 from_table(PRD, '10. Riscos', 'PRD-RISK', 'Risco', lambda r: f'{r[0]} — P: {r[1]}, I: {r[2]}')
-AC = [('Notificação em menos de 10 s para status no filtro', '[09:02] Marcos'),
-      ('Sem notificação para status fora do filtro', '[09:34] Bruno'),
-      ('URL http:// recusada no cadastro', '[09:23] Sofia'),
-      ('Secret só no cadastro/rotação; anterior aceita por 24 h', '[09:21] Sofia'),
-      ('Assinatura válida e identificador de evento estável em reenvios', '[09:25] Diego'),
-      ('Retentativa automática e DLQ após o limite', '[09:17] Larissa'),
-      ('Replay só por ADMIN, com registro de autoria', '[09:36] Sofia'),
-      ('Histórico das últimas 100 entregas', '[09:34] Marcos'),
-      ('Falha no registro da notificação impede a mudança de status', '[09:40] Bruno'),
-      ('Revisão de segurança concluída antes do deploy', '[09:46] Sofia')]
+AC = [('Entrega: notificação em < 10 s só para status do filtro, com assinatura válida e identificador de evento estável em reenvios', '[09:02] Marcos'),
+      ('Cadastro e segurança: URL http:// recusada; secret só no cadastro e na rotação, anterior aceita por 24 h; revisão de segurança antes do deploy', '[09:21] Sofia'),
+      ('Falhas e operação: retentativa automática e DLQ; replay só por ADMIN com autoria registrada; histórico das últimas 100 entregas; falha no registro impede a mudança de status', '[09:17] Larissa')]
 for i, (txt, loc) in enumerate(AC, 1):
     add(f'PRD-AC-{i:02d}', PRD, 'Critério de aceitação', txt, src_text=loc)
 from_table(PRD, '12. Estratégia de testes', 'PRD-TEST', 'Estratégia de testes', lambda r: f'{r[0]}: {r[1]}')
@@ -243,7 +238,7 @@ for t in tables(section(read(FDD), '7. Matriz de erros')):
         quando = row[3] if len(row) == 5 else row[2]
         if code in ERR_LOC:
             f_, loc = ERR_LOC[code]
-            add(f'FDD-ERR-{n:02d}', FDD, 'Erro (matriz)', f'{code}: {quando}', f_, loc)
+            add(f'FDD-ERR-{n:02d}', FDD, 'Erro (matriz)', f'{code}: {quando}', f_, loc, raw=' '.join(row))
         else:
             add(f'FDD-ERR-{n:02d}', FDD, 'Erro (matriz)', f'{code}: {quando}', src_text=' '.join(row))
 add('FDD-ERR-BASE', FDD, 'Restrição de código', 'NotFoundError fixa o código NOT_FOUND → 404 do módulo estendem AppError', 'CODIGO', 'src/shared/errors/http-errors.ts')
@@ -252,11 +247,11 @@ RES_LOC = {'Crash do worker': '[09:24] Diego', 'Isolamento entre endpoints': '[0
 t = tables(section(read(FDD), '8. Estratégias de resiliência'))[0]
 for i, row in enumerate(t, 1):
     k = clean(row[0])
-    add(f'FDD-RES-{i:02d}', FDD, 'Resiliência', f'{row[0]}: {row[1]}', src_text=RES_LOC.get(k, ' '.join(row)))
+    add(f'FDD-RES-{i:02d}', FDD, 'Resiliência', f'{row[0]}: {row[1]}', src_text=RES_LOC.get(k, ' '.join(row)), raw=' '.join(row))
 add(f'FDD-RES-{len(t) + 1:02d}', FDD, 'Limitação', 'Ordem por pedido só na 1ª tentativa; evento em retry pode ser ultrapassado', src_text='[09:12] Diego')
 OBS = [('Logs estruturados Pino: enqueued, succeeded, failed, moved_to_dlq, secret_rotated, worker_cycle', 'CODIGO', 'src/shared/logger/index.ts'),
        ('Log de auditoria webhook_dlq_replayed com userId', None, '[09:36] Sofia'),
-       ('Redact de *.secret e *.previousSecret no logger', None, '[09:22] Diego'),
+       ('Redact dos campos secret e previousSecret no logger', None, '[09:22] Diego'),
        ('Métricas (proposta): pendentes, idade do pendente mais antigo vs. 10 s, sucesso, p95, DLQ/dia', None, '[09:02] Marcos'),
        ('Métrica de volume por customer como insumo para decidir rate limiting', None, '[09:39] Larissa'),
        ('Tracing (proposta): correlação requestId → eventId → webhookId, sem OpenTelemetry', 'CODIGO', 'src/middlewares/request-logger.middleware.ts')]
@@ -293,25 +288,16 @@ RISK_LOC = {1: '[09:12] Diego', 3: '[09:11] Diego', 4: '[09:04] Bruno', 7: '[09:
 t = tables(section(read(FDD), '13. Riscos'))[0]
 for i, row in enumerate(t, 1):
     src = RISK_LOC.get(i, ' '.join(row))
-    add(f'FDD-RISK-{i:02d}', FDD, 'Risco', f'{row[0]} — P: {row[1]}, I: {row[2]}', src_text=src)
+    add(f'FDD-RISK-{i:02d}', FDD, 'Risco', f'{row[0]} — P: {row[1]}, I: {row[2]}', src_text=src, raw=' '.join(row))
 TEST_LOC = {1: '[09:17] Diego', 2: '[09:22] Sofia', 7: '[09:42] Diego', 8: '[09:36] Sofia', 9: '[09:23] Sofia'}
 t = tables(section(read(FDD), '14. Plano de testes'))[0]
 for i, row in enumerate(t, 1):
     src = TEST_LOC.get(i, ' '.join(row))
-    add(f'FDD-TEST-{i:02d}', FDD, 'Teste', f'{row[0]}: {row[1]}', src_text=src)
-AC = [('Outbox na mesma transação; falha desfaz a mudança', '[09:40] Bruno'),
-      ('Nenhum evento para endpoint que não ouve o status ou inativo', '[09:34] Bruno'),
-      ('Envio em ≤ 2 s após o commit', '[09:09] Diego'),
-      ('Payload e 5 headers com assinatura válida', '[09:44] Diego'),
-      ('Retry 1m/5m/30m/2h/12h e DLQ após 6º envio', '[09:17] Larissa'),
-      ('Payload > 64 KB vai para a DLQ', '[09:24] Larissa'),
-      ('Replay ADMIN com mesmo eventId e userId no log', '[09:36] Sofia'),
-      ('Rotação com 24 h de carência', '[09:21] Sofia'),
-      ('URL http:// recusada com 400', '[09:23] Sofia'),
-      ('Erros WEBHOOK_ via error.middleware sem alteração', '[09:29] Bruno'),
-      ('Worker via npm run worker com PrismaClient próprio', '[09:11] Larissa'),
-      ('Secret ausente de logs e respostas', '[09:22] Diego'),
-      ('Testes passando e revisão da Sofia concluída', '[09:46] Sofia')]
+    add(f'FDD-TEST-{i:02d}', FDD, 'Teste', f'{row[0]}: {row[1]}', src_text=src, raw=' '.join(row))
+AC = [('Transação e filtro: outbox na mesma transação (falha desfaz a mudança); nada para endpoint que não ouve o status ou inativo; envio em ≤ 2 s', '[09:40] Bruno'),
+      ('Contrato e segurança: payload e 5 headers com assinatura válida; rotação com 24 h de carência; http:// → 400; secret fora de logs e respostas', '[09:44] Diego'),
+      ('Falhas: retry 1m/5m/30m/2h/12h e DLQ após o 6º envio; payload > 64 KB → DLQ; replay ADMIN com mesmo eventId e userId no log', '[09:17] Larissa'),
+      ('Padrões e operação: erros WEBHOOK_ via error.middleware sem alteração; worker via npm run worker com PrismaClient próprio; testes e revisão da Sofia concluídos', '[09:30] Larissa')]
 for i, (txt, loc) in enumerate(AC, 1):
     add(f'FDD-AC-{i:02d}', FDD, 'Critério de aceite técnico', txt, src_text=loc)
 
@@ -324,6 +310,15 @@ OVERRIDE = {
 for r in ROWS:
     if r[0] in OVERRIDE:
         r[4], r[5] = OVERRIDE[r[0]]
+# itens que o FDD marca como proposta mas cujo resumo não contém a palavra
+PROP_IDS = {'FDD-CONTRATO-02', 'FDD-CONTRATO-04', 'FDD-CONTRATO-05', 'FDD-FLUXO-07', 'FDD-OBS-01', 'FDD-OBS-03'}
+# alternativas registradas nos ADRs como "plausíveis" (não discutidas na reunião)
+PLAUSIVEIS = {'ADR-004-ALT-02', 'ADR-005-ALT-02', 'ADR-006-ALT-01'}
+for r in ROWS:
+    if r[0] in PROP_IDS and not r[2].endswith('proposta'):
+        r[2] = f'{r[2]} — proposta'
+    if r[0] in PLAUSIVEIS:
+        r[2] = 'Alternativa plausível (não discutida)'
 
 # ---------------- saída ----------------
 sem = [r for r in ROWS if not r[4]]

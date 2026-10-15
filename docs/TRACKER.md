@@ -9,7 +9,7 @@ Liga cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [ADRs
 - Quando o item cita várias falas, a localização aponta a **principal**. As demais estão no próprio documento.
 - Itens marcados nos documentos como *(proposta)* não foram decididos na reunião. A localização deles aponta a fala ou o arquivo que **motivou** a proposta, e o resumo deixa claro que é proposta.
 
-**Totais:** 305 linhas · 263 com fonte `TRANSCRICAO` (86%) · 42 com fonte `CODIGO` (14%).
+**Totais:** 289 linhas · 247 com fonte `TRANSCRICAO` (85%) · 42 com fonte `CODIGO` (15%).
 
 | ID | Documento | Tipo | Conteúdo (resumo) | Fonte | Localização |
 |---|---|---|---|---|---|
@@ -32,7 +32,7 @@ Liga cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [ADRs
 | PRD-OBJ-02 | `docs/PRD.md` | Objetivo / Métrica | Não perder notificações — meta: 0 (garantia transacional) | TRANSCRICAO | [09:40] Bruno |
 | PRD-OBJ-03 | `docs/PRD.md` | Objetivo / Métrica | Tolerar indisponibilidade do cliente — meta: ~15 h (1 envio + 5 retentativas) | TRANSCRICAO | [09:17] Diego |
 | PRD-OBJ-04 | `docs/PRD.md` | Objetivo / Métrica | Reter os clientes solicitantes — meta: Até o fim de novembro, em 3 sprints | TRANSCRICAO | [09:45] Marcos |
-| PRD-OBJ-05 | `docs/PRD.md` | Objetivo / Métrica | Reduzir o polling (proposta) — meta: Queda em relação à linha de base medida antes do lançamento. A meta numérica será defin… | TRANSCRICAO | [09:00] Marcos |
+| PRD-OBJ-05 | `docs/PRD.md` | Objetivo / Métrica — proposta | Reduzir o polling (proposta) — meta: Queda em relação à linha de base medida antes do lançamento. A meta numérica será defin… | TRANSCRICAO | [09:00] Marcos |
 | PRD-ESC-01 | `docs/PRD.md` | Escopo (incluso) | Cadastro, edição, remoção e listagem de webhooks por customer via API autenticada | TRANSCRICAO | [09:33] Bruno |
 | PRD-ESC-02 | `docs/PRD.md` | Escopo (incluso) | Filtro por webhook dos status de pedido de interesse | TRANSCRICAO | [09:33] Marcos |
 | PRD-ESC-03 | `docs/PRD.md` | Escopo (incluso) | Notificação automática a cada mudança de status | TRANSCRICAO | [09:00] Marcos |
@@ -89,23 +89,16 @@ Liga cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [ADRs
 | PRD-RISK-01 | `docs/PRD.md` | Risco | Atraso na entrega e perda da Atlas para um concorrente — P: Média, I: Alto | TRANSCRICAO | [09:00] Marcos |
 | PRD-RISK-02 | `docs/PRD.md` | Risco | Cliente processa notificações duplicadas porque não deduplica — P: Média, I: Médio | TRANSCRICAO | [09:25] Sofia |
 | PRD-RISK-03 | `docs/PRD.md` | Risco | Vazamento da secret do lado do cliente (ex.: em log da aplicação dele) — P: Média (já aconteceu), I: Alto | TRANSCRICAO | [09:22] Diego |
-| PRD-RISK-04 | `docs/PRD.md` | Risco | Processo de envio parado → notificações atrasam — P: Média, I: Alto | TRANSCRICAO | [09:11] Diego |
+| PRD-RISK-04 | `docs/PRD.md` | Risco — proposta | Processo de envio parado → notificações atrasam — P: Média, I: Alto | TRANSCRICAO | [09:11] Diego |
 | PRD-RISK-05 | `docs/PRD.md` | Risco | Volume alto de notificações para um mesmo cliente (ex.: 50 por minuto) — P: Média, I: Médio | TRANSCRICAO | [09:38] Diego |
 | PRD-RISK-06 | `docs/PRD.md` | Risco | Qualquer usuário autenticado gerencia webhooks de qualquer customer — P: Média, I: Médio | TRANSCRICAO | [09:37] Sofia |
-| PRD-AC-01 | `docs/PRD.md` | Critério de aceitação | Notificação em menos de 10 s para status no filtro | TRANSCRICAO | [09:02] Marcos |
-| PRD-AC-02 | `docs/PRD.md` | Critério de aceitação | Sem notificação para status fora do filtro | TRANSCRICAO | [09:34] Bruno |
-| PRD-AC-03 | `docs/PRD.md` | Critério de aceitação | URL http:// recusada no cadastro | TRANSCRICAO | [09:23] Sofia |
-| PRD-AC-04 | `docs/PRD.md` | Critério de aceitação | Secret só no cadastro/rotação; anterior aceita por 24 h | TRANSCRICAO | [09:21] Sofia |
-| PRD-AC-05 | `docs/PRD.md` | Critério de aceitação | Assinatura válida e identificador de evento estável em reenvios | TRANSCRICAO | [09:25] Diego |
-| PRD-AC-06 | `docs/PRD.md` | Critério de aceitação | Retentativa automática e DLQ após o limite | TRANSCRICAO | [09:17] Larissa |
-| PRD-AC-07 | `docs/PRD.md` | Critério de aceitação | Replay só por ADMIN, com registro de autoria | TRANSCRICAO | [09:36] Sofia |
-| PRD-AC-08 | `docs/PRD.md` | Critério de aceitação | Histórico das últimas 100 entregas | TRANSCRICAO | [09:34] Marcos |
-| PRD-AC-09 | `docs/PRD.md` | Critério de aceitação | Falha no registro da notificação impede a mudança de status | TRANSCRICAO | [09:40] Bruno |
-| PRD-AC-10 | `docs/PRD.md` | Critério de aceitação | Revisão de segurança concluída antes do deploy | TRANSCRICAO | [09:46] Sofia |
+| PRD-AC-01 | `docs/PRD.md` | Critério de aceitação | Entrega: notificação em < 10 s só para status do filtro, com assinatura válida e identificador de evento estável em reenvios | TRANSCRICAO | [09:02] Marcos |
+| PRD-AC-02 | `docs/PRD.md` | Critério de aceitação | Cadastro e segurança: URL http:// recusada; secret só no cadastro e na rotação, anterior aceita por 24 h; revisão de seguran… | TRANSCRICAO | [09:21] Sofia |
+| PRD-AC-03 | `docs/PRD.md` | Critério de aceitação | Falhas e operação: retentativa automática e DLQ; replay só por ADMIN com autoria registrada; histórico das últimas 100 entre… | TRANSCRICAO | [09:17] Larissa |
 | PRD-TEST-01 | `docs/PRD.md` | Estratégia de testes | Testes automatizados (unitários e de integração): Filtro, atomicidade, retentativas, DLQ, permissão de ADMIN e assinatura. D… | TRANSCRICAO | [09:46] Larissa |
 | PRD-TEST-02 | `docs/PRD.md` | Estratégia de testes | Revisão de segurança: Código de assinatura e geração de secret, 2 dias úteis antes do deploy | TRANSCRICAO | [09:46] Sofia |
 | PRD-TEST-03 | `docs/PRD.md` | Estratégia de testes | Sessão de revisão do design com Bruno e Diego, antes de começar a codar: Aderência deste pacote ao que foi decidido | TRANSCRICAO | [09:50] Larissa |
-| PRD-TEST-04 | `docs/PRD.md` | Estratégia de testes | Validação com os clientes solicitantes (proposta): Atlas, MaxDistribuição e Nova Cargo recebem as notificações no ambiente d… | TRANSCRICAO | [09:47] Marcos |
+| PRD-TEST-04 | `docs/PRD.md` | Estratégia de testes — proposta | Validação com os clientes solicitantes (proposta): Atlas, MaxDistribuição e Nova Cargo recebem as notificações no ambiente d… | TRANSCRICAO | [09:47] Marcos |
 | PRD-TEST-05 | `docs/PRD.md` | Estratégia de testes | Acompanhamento pós-lançamento: Volume por cliente (insumo para rate limiting) e falhas recorrentes (insumo para o email de a… | TRANSCRICAO | [09:37] Larissa |
 | RFC-META-01 | `docs/RFC.md` | Metadado | Autora Larissa (Tech Lead) abre o doc de design; revisores Marcos, Bruno, Diego, Sofia | TRANSCRICAO | [09:50] Larissa |
 | RFC-CTX-01 | `docs/RFC.md` | Contexto | Fluxo apenas de saída (outbound): clientes recebem, não enviam | TRANSCRICAO | [09:02] Marcos |
@@ -142,7 +135,7 @@ Liga cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [ADRs
 | RFC-RES-01 | `docs/RFC.md` | Decisão (ambiguidade resolvida) | "5 tentativas" com 5 intervalos listados → Envio inicial + 5 retentativas. É a única leitura compatível com os ~15 h citados… | TRANSCRICAO | [09:17] Diego |
 | RFC-RES-02 | `docs/RFC.md` | Decisão (ambiguidade resolvida) | Granularidade da outbox → Uma linha por par evento × webhook, com event_id, retry e DLQ próprios. → ADR-005 | TRANSCRICAO | [09:34] Bruno |
 | RFC-RES-03 | `docs/RFC.md` | Decisão (ambiguidade resolvida) | Criação do pedido (null → PENDING) gera evento? → Não nesta fase. Só changeStatus publica. → ADR-007 | TRANSCRICAO | [09:40] Bruno |
-| RFC-RISK-01 | `docs/RFC.md` | Risco | Worker parado → entregas atrasam (single-worker é ponto único de falha) — mitigação: Eventos persistem na outbox e nada se p… | TRANSCRICAO | [09:11] Diego |
+| RFC-RISK-01 | `docs/RFC.md` | Risco — proposta | Worker parado → entregas atrasam (single-worker é ponto único de falha) — mitigação: Eventos persistem na outbox e nada se p… | TRANSCRICAO | [09:11] Diego |
 | RFC-RISK-02 | `docs/RFC.md` | Risco | Cliente não deduplica → processa eventos em dobro — mitigação: Documentação em destaque no portal. X-Event-Id estável entre… | TRANSCRICAO | [09:25] Sofia |
 | RFC-RISK-03 | `docs/RFC.md` | Risco | Vazamento de secret de cliente (já aconteceu) — mitigação: Secret por endpoint, rotação com 24 h de carência, revisão de seg… | TRANSCRICAO | [09:22] Diego |
 | RFC-RISK-04 | `docs/RFC.md` | Risco | Inserção na outbox falha → mudança de status falha — mitigação: Comportamento desejado: rollback garante que não exista stat… | TRANSCRICAO | [09:40] Bruno |
@@ -163,12 +156,12 @@ Liga cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [ADRs
 | ADR-003-ALT-03 | `docs/adrs/ADR-003-retry-backoff-e-dlq.md` | Alternativa descartada | DLQ como status "failed" na própria outbox — Uma tabela separada mantém a leitura da outbox limpa e serve de evidência para… | TRANSCRICAO | [09:17] Larissa |
 | ADR-004 | `docs/adrs/ADR-004-hmac-sha256-com-secret-por-endpoint.md` | Decisão | HMAC-SHA256 sobre o corpo, secret por endpoint gerada pela plataforma, rotação com grace de 24 h | TRANSCRICAO | [09:22] Sofia |
 | ADR-004-ALT-01 | `docs/adrs/ADR-004-hmac-sha256-com-secret-por-endpoint.md` | Alternativa descartada | Secret global da plataforma (uma para todos os clientes) — "Se vaza uma, vaza tudo" | TRANSCRICAO | [09:21] Sofia |
-| ADR-004-ALT-02 | `docs/adrs/ADR-004-hmac-sha256-com-secret-por-endpoint.md` | Alternativa descartada | Rotação sem período de convivência (troca imediata) — Plausível, mas não atende à necessidade de dar tempo ao cliente para m… | TRANSCRICAO | [09:21] Sofia |
+| ADR-004-ALT-02 | `docs/adrs/ADR-004-hmac-sha256-com-secret-por-endpoint.md` | Alternativa plausível (não discutida) | Rotação sem período de convivência (troca imediata) — Plausível, mas não atende à necessidade de dar tempo ao cliente para m… | TRANSCRICAO | [09:21] Sofia |
 | ADR-005 | `docs/adrs/ADR-005-entrega-at-least-once-com-x-event-id.md` | Decisão | Entrega at-least-once; X-Event-Id (UUID) para deduplicação; 1 linha de outbox por evento × webhook | TRANSCRICAO | [09:26] Larissa |
 | ADR-005-ALT-01 | `docs/adrs/ADR-005-entrega-at-least-once-com-x-event-id.md` | Alternativa descartada | Exactly-once — Exigiria coordenação entre os dois lados e "fica muito mais complexo". At-least-once com event_id resolve a g… | TRANSCRICAO | [09:25] Diego |
-| ADR-005-ALT-02 | `docs/adrs/ADR-005-entrega-at-least-once-com-x-event-id.md` | Alternativa descartada | At-most-once (sem retry) — Plausível, mas incompatível com a política de retry aceita (ADR-003): perder um evento é pior par… | TRANSCRICAO | [09:24] Diego |
+| ADR-005-ALT-02 | `docs/adrs/ADR-005-entrega-at-least-once-com-x-event-id.md` | Alternativa plausível (não discutida) | At-most-once (sem retry) — Plausível, mas incompatível com a política de retry aceita (ADR-003): perder um evento é pior par… | TRANSCRICAO | [09:24] Diego |
 | ADR-006 | `docs/adrs/ADR-006-reuso-dos-padroes-do-projeto.md` | Decisão | Reuso máximo dos padrões: módulo, AppError, códigos WEBHOOK_, error middleware, requireRole, Zod, Pino | TRANSCRICAO | [09:30] Larissa |
-| ADR-006-ALT-01 | `docs/adrs/ADR-006-reuso-dos-padroes-do-projeto.md` | Alternativa descartada | Padrões próprios para o módulo (outro formato de erro, outro logger) — Plausível, mas não traria ganho. "Não vamos botar nad… | TRANSCRICAO | [09:29] Bruno |
+| ADR-006-ALT-01 | `docs/adrs/ADR-006-reuso-dos-padroes-do-projeto.md` | Alternativa plausível (não discutida) | Padrões próprios para o módulo (outro formato de erro, outro logger) — Plausível, mas não traria ganho. "Não vamos botar nad… | TRANSCRICAO | [09:29] Bruno |
 | ADR-006-ALT-02 | `docs/adrs/ADR-006-reuso-dos-padroes-do-projeto.md` | Alternativa descartada | Restringir o CRUD de configuração a ADMIN — Mexer em configuração de webhook pode ser feito por qualquer role autenticada po… | TRANSCRICAO | [09:36] Marcos |
 | ADR-006-COD-01 | `docs/adrs/ADR-006-reuso-dos-padroes-do-projeto.md` | Padrão de código reutilizado | Módulo por domínio (controller, service, repository, routes, schemas) → Nova pasta src/modules/webhooks/ (a criar) com a mes… | CODIGO | `src/modules/orders/` |
 | ADR-006-COD-02 | `docs/adrs/ADR-006-reuso-dos-padroes-do-projeto.md` | Padrão de código reutilizado | Classe base de erro → Todos os erros do módulo derivam dela | CODIGO | `src/shared/errors/app-error.ts` |
@@ -203,21 +196,21 @@ Liga cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [ADRs
 | FDD-DADOS-03 | `docs/FDD.md` | Modelo de dados | Model WebhookDelivery: tentativa, sucesso, status/corpo da resposta, durationMs | TRANSCRICAO | [09:34] Marcos |
 | FDD-DADOS-04 | `docs/FDD.md` | Modelo de dados | Model WebhookDeadLetter: payload, reason, attempts, failedAt, replayedAt/By | TRANSCRICAO | [09:18] Diego |
 | FDD-DADOS-05 | `docs/FDD.md` | Modelo de dados | IDs UUID Char(36) no padrão do schema existente | CODIGO | `prisma/schema.prisma` |
-| FDD-DADOS-06 | `docs/FDD.md` | Modelo de dados | Status FAILED como estado terminal na outbox; evidência na DLQ (proposta, resolve AMB-02) | TRANSCRICAO | [09:08] Diego |
-| FDD-DADOS-07 | `docs/FDD.md` | Modelo de dados | DELETE lógico com deletedAt para preservar histórico e DLQ (proposta) | TRANSCRICAO | [09:18] Diego |
+| FDD-DADOS-06 | `docs/FDD.md` | Modelo de dados — proposta | Status FAILED como estado terminal na outbox; evidência na DLQ (proposta, resolve AMB-02) | TRANSCRICAO | [09:08] Diego |
+| FDD-DADOS-07 | `docs/FDD.md` | Modelo de dados — proposta | DELETE lógico com deletedAt para preservar histórico e DLQ (proposta) | TRANSCRICAO | [09:18] Diego |
 | FDD-FLUXO-01 | `docs/FDD.md` | Fluxo | Inserção na outbox após orderStatusHistory.create, dentro do $transaction de changeStatus | CODIGO | `src/modules/orders/order.service.ts` |
 | FDD-FLUXO-02 | `docs/FDD.md` | Fluxo | Filtro na inserção: só endpoints ativos do customer que ouvem o to_status | TRANSCRICAO | [09:34] Bruno |
-| FDD-FLUXO-03 | `docs/FDD.md` | Fluxo | Worker: ciclo a cada 2 s, lote de 10 (proposta), envio sequencial por createdAt | TRANSCRICAO | [09:09] Diego |
-| FDD-FLUXO-04 | `docs/FDD.md` | Fluxo | Recuperação de crash: PROCESSING volta a PENDING na inicialização (proposta) | TRANSCRICAO | [09:24] Diego |
+| FDD-FLUXO-03 | `docs/FDD.md` | Fluxo — proposta | Worker: ciclo a cada 2 s, lote de 10 (proposta), envio sequencial por createdAt | TRANSCRICAO | [09:09] Diego |
+| FDD-FLUXO-04 | `docs/FDD.md` | Fluxo — proposta | Recuperação de crash: PROCESSING volta a PENDING na inicialização (proposta) | TRANSCRICAO | [09:24] Diego |
 | FDD-FLUXO-05 | `docs/FDD.md` | Fluxo | Retry: tabela de backoff por attempts; 6º envio falho → DLQ | TRANSCRICAO | [09:17] Diego |
-| FDD-FLUXO-06 | `docs/FDD.md` | Fluxo | Classificação de retry: timeout, rede, 5xx, 408, 429 retentam; demais 3xx/4xx → DLQ (proposta, AMB-09) | TRANSCRICAO | [09:42] Diego |
-| FDD-FLUXO-07 | `docs/FDD.md` | Fluxo | Replay: mesma linha da outbox volta a PENDING com o mesmo eventId | TRANSCRICAO | [09:18] Diego |
-| FDD-FLUXO-08 | `docs/FDD.md` | Fluxo | Rotação: secret anterior válida 24 h; duas assinaturas em X-Signature (proposta) | TRANSCRICAO | [09:21] Sofia |
+| FDD-FLUXO-06 | `docs/FDD.md` | Fluxo — proposta | Classificação de retry: timeout, rede, 5xx, 408, 429 retentam; demais 3xx/4xx → DLQ (proposta, AMB-09) | TRANSCRICAO | [09:42] Diego |
+| FDD-FLUXO-07 | `docs/FDD.md` | Fluxo — proposta | Replay: mesma linha da outbox volta a PENDING com o mesmo eventId | TRANSCRICAO | [09:18] Diego |
+| FDD-FLUXO-08 | `docs/FDD.md` | Fluxo — proposta | Rotação: secret anterior válida 24 h; duas assinaturas em X-Signature (proposta) | TRANSCRICAO | [09:21] Sofia |
 | FDD-CONTRATO-01 | `docs/FDD.md` | Contrato público | POST /api/v1/webhooks — cadastra webhook; customerId no body; secret devolvida só aqui; 201 | TRANSCRICAO | [09:31] Marcos |
-| FDD-CONTRATO-02 | `docs/FDD.md` | Contrato público | GET /api/v1/customers/:customerId/webhooks — lista webhooks do customer (customerId no path); 200 | TRANSCRICAO | [09:33] Bruno |
+| FDD-CONTRATO-02 | `docs/FDD.md` | Contrato público — proposta | GET /api/v1/customers/:customerId/webhooks — lista webhooks do customer (customerId no path); 200 | TRANSCRICAO | [09:33] Bruno |
 | FDD-CONTRATO-03 | `docs/FDD.md` | Contrato público | PATCH /api/v1/webhooks/:id — edita url, events, active; 200 | TRANSCRICAO | [09:33] Bruno |
-| FDD-CONTRATO-04 | `docs/FDD.md` | Contrato público | DELETE /api/v1/webhooks/:id — remoção lógica; 204 | TRANSCRICAO | [09:33] Bruno |
-| FDD-CONTRATO-05 | `docs/FDD.md` | Contrato público | POST /api/v1/webhooks/:id/rotate-secret — nova secret, anterior válida 24 h; 200 | TRANSCRICAO | [09:21] Sofia |
+| FDD-CONTRATO-04 | `docs/FDD.md` | Contrato público — proposta | DELETE /api/v1/webhooks/:id — remoção lógica; 204 | TRANSCRICAO | [09:33] Bruno |
+| FDD-CONTRATO-05 | `docs/FDD.md` | Contrato público — proposta | POST /api/v1/webhooks/:id/rotate-secret — nova secret, anterior válida 24 h; 200 | TRANSCRICAO | [09:21] Sofia |
 | FDD-CONTRATO-06 | `docs/FDD.md` | Contrato público | GET /api/v1/webhooks/:id/deliveries — últimas 100 tentativas com payload, resposta e tempo; 200 | TRANSCRICAO | [09:34] Marcos |
 | FDD-CONTRATO-07 | `docs/FDD.md` | Contrato público | POST /api/v1/admin/webhooks/dead-letter/:id/replay — ADMIN, auditado; 202 | TRANSCRICAO | [09:35] Diego |
 | FDD-CONTRATO-08 | `docs/FDD.md` | Contrato público | Contrato de saída: payload event_id, event_type, timestamp, order_id, order_number, from/to_status, customer_id, total_cents | TRANSCRICAO | [09:43] Diego |
@@ -225,19 +218,19 @@ Liga cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [ADRs
 | FDD-CONTRATO-10 | `docs/FDD.md` | Contrato público | customerId nunca vem do JWT | TRANSCRICAO | [09:32] Larissa |
 | FDD-CONTRATO-11 | `docs/FDD.md` | Contrato público | Endpoints sob /api/v1 com authenticate | CODIGO | `src/app.ts` |
 | FDD-ERR-01 | `docs/FDD.md` | Erro (matriz) | WEBHOOK_NOT_FOUND: Webhook inexistente ou removido | TRANSCRICAO | [09:28] Bruno |
-| FDD-ERR-02 | `docs/FDD.md` | Erro (matriz) | WEBHOOK_CUSTOMER_NOT_FOUND: customerId inexistente na criação ou listagem | TRANSCRICAO | [09:32] Larissa |
-| FDD-ERR-03 | `docs/FDD.md` | Erro (matriz) | WEBHOOK_DEAD_LETTER_NOT_FOUND: Id de DLQ inexistente no replay | TRANSCRICAO | [09:18] Diego |
+| FDD-ERR-02 | `docs/FDD.md` | Erro (matriz) — proposta | WEBHOOK_CUSTOMER_NOT_FOUND: customerId inexistente na criação ou listagem | TRANSCRICAO | [09:32] Larissa |
+| FDD-ERR-03 | `docs/FDD.md` | Erro (matriz) — proposta | WEBHOOK_DEAD_LETTER_NOT_FOUND: Id de DLQ inexistente no replay | TRANSCRICAO | [09:18] Diego |
 | FDD-ERR-04 | `docs/FDD.md` | Erro (matriz) | WEBHOOK_INVALID_URL: URL malformada ou não-https. A regra fica no schema Zod, e validate.middleware.ts:31 converte para VALI… | TRANSCRICAO | [09:23] Sofia |
-| FDD-ERR-05 | `docs/FDD.md` | Erro (matriz) | WEBHOOK_INVALID_EVENT_FILTER: events vazio ou com valor fora de OrderStatus (mesmo mecanismo acima) | TRANSCRICAO | [09:33] Marcos |
-| FDD-ERR-06 | `docs/FDD.md` | Erro (matriz) | WEBHOOK_INACTIVE: Operação sobre webhook removido ou desativado | TRANSCRICAO | [09:21] Bruno |
-| FDD-ERR-07 | `docs/FDD.md` | Erro (matriz) | WEBHOOK_DEAD_LETTER_ALREADY_REPLAYED: Replay repetido da mesma entrada | TRANSCRICAO | [09:18] Diego |
+| FDD-ERR-05 | `docs/FDD.md` | Erro (matriz) — proposta | WEBHOOK_INVALID_EVENT_FILTER: events vazio ou com valor fora de OrderStatus (mesmo mecanismo acima) | TRANSCRICAO | [09:33] Marcos |
+| FDD-ERR-06 | `docs/FDD.md` | Erro (matriz) — proposta | WEBHOOK_INACTIVE: Operação sobre webhook removido ou desativado | TRANSCRICAO | [09:21] Bruno |
+| FDD-ERR-07 | `docs/FDD.md` | Erro (matriz) — proposta | WEBHOOK_DEAD_LETTER_ALREADY_REPLAYED: Replay repetido da mesma entrada | TRANSCRICAO | [09:18] Diego |
 | FDD-ERR-08 | `docs/FDD.md` | Erro (matriz) | WEBHOOK_DELIVERY_TIMEOUT: Sem resposta em 10 s | TRANSCRICAO | [09:42] Diego |
-| FDD-ERR-09 | `docs/FDD.md` | Erro (matriz) | WEBHOOK_DELIVERY_FAILED: Resposta 5xx, 408 ou 429 | TRANSCRICAO | [09:15] Diego |
-| FDD-ERR-10 | `docs/FDD.md` | Erro (matriz) | WEBHOOK_DELIVERY_REJECTED: Resposta 3xx ou 4xx (exceto 408 e 429): o cliente recusou a requisição | TRANSCRICAO | [09:15] Diego |
-| FDD-ERR-11 | `docs/FDD.md` | Erro (matriz) | WEBHOOK_NETWORK_ERROR: DNS, conexão recusada, TLS | TRANSCRICAO | [09:14] Larissa |
+| FDD-ERR-09 | `docs/FDD.md` | Erro (matriz) — proposta | WEBHOOK_DELIVERY_FAILED: Resposta 5xx, 408 ou 429 | TRANSCRICAO | [09:15] Diego |
+| FDD-ERR-10 | `docs/FDD.md` | Erro (matriz) — proposta | WEBHOOK_DELIVERY_REJECTED: Resposta 3xx ou 4xx (exceto 408 e 429): o cliente recusou a requisição | TRANSCRICAO | [09:15] Diego |
+| FDD-ERR-11 | `docs/FDD.md` | Erro (matriz) — proposta | WEBHOOK_NETWORK_ERROR: DNS, conexão recusada, TLS | TRANSCRICAO | [09:14] Larissa |
 | FDD-ERR-12 | `docs/FDD.md` | Erro (matriz) | WEBHOOK_MAX_ATTEMPTS_EXCEEDED: Falha no 6º envio | TRANSCRICAO | [09:17] Larissa |
-| FDD-ERR-13 | `docs/FDD.md` | Erro (matriz) | WEBHOOK_PAYLOAD_TOO_LARGE: Corpo serializado acima de 64 KB. A checagem fica no worker, não na transação, para que um payloa… | TRANSCRICAO | [09:23] Sofia |
-| FDD-ERR-14 | `docs/FDD.md` | Erro (matriz) | WEBHOOK_SECRET_REQUIRED: Endpoint sem secret válida no envio, o que indica estado inconsistente: não se envia sem assinar (p… | TRANSCRICAO | [09:28] Bruno |
+| FDD-ERR-13 | `docs/FDD.md` | Erro (matriz) — proposta | WEBHOOK_PAYLOAD_TOO_LARGE: Corpo serializado acima de 64 KB. A checagem fica no worker, não na transação, para que um payloa… | TRANSCRICAO | [09:23] Sofia |
+| FDD-ERR-14 | `docs/FDD.md` | Erro (matriz) — proposta | WEBHOOK_SECRET_REQUIRED: Endpoint sem secret válida no envio, o que indica estado inconsistente: não se envia sem assinar (p… | TRANSCRICAO | [09:28] Bruno |
 | FDD-ERR-BASE | `docs/FDD.md` | Restrição de código | NotFoundError fixa o código NOT_FOUND → 404 do módulo estendem AppError | CODIGO | `src/shared/errors/http-errors.ts` |
 | FDD-ERR-ZOD | `docs/FDD.md` | Restrição de código | validate.middleware converte ZodError em VALIDATION_ERROR → WEBHOOK_INVALID_URL vai em details | CODIGO | `src/middlewares/validate.middleware.ts` |
 | FDD-RES-01 | `docs/FDD.md` | Resiliência | Timeout HTTP: 10 s, com fetch nativo + AbortSignal.timeout(10_000) (Node ≥ 20, package.json:7-9) | TRANSCRICAO | [09:42] Diego |
@@ -246,18 +239,18 @@ Liga cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [ADRs
 | FDD-RES-04 | `docs/FDD.md` | Resiliência | Fallback: DLQ + replay manual por ADMIN. Não há email nesta fase | TRANSCRICAO | [09:18] Diego |
 | FDD-RES-05 | `docs/FDD.md` | Resiliência | Limite de payload: 64 KB → DLQ, sem truncar | TRANSCRICAO | [09:23] Sofia |
 | FDD-RES-06 | `docs/FDD.md` | Resiliência | Isolamento da API: A API nunca faz HTTP de saída. Só o worker faz | TRANSCRICAO | [09:06] Diego |
-| FDD-RES-07 | `docs/FDD.md` | Resiliência | Crash do worker: Linhas PROCESSING voltam a PENDING na inicialização (proposta) | TRANSCRICAO | [09:24] Diego |
-| FDD-RES-08 | `docs/FDD.md` | Resiliência | Shutdown gracioso: SIGINT/SIGTERM: termina o evento em curso, para o loop e chama prisma.$disconnect (modelo de src/server.t… | TRANSCRICAO | [09:11] Larissa |
+| FDD-RES-07 | `docs/FDD.md` | Resiliência — proposta | Crash do worker: Linhas PROCESSING voltam a PENDING na inicialização (proposta) | TRANSCRICAO | [09:24] Diego |
+| FDD-RES-08 | `docs/FDD.md` | Resiliência — proposta | Shutdown gracioso: SIGINT/SIGTERM: termina o evento em curso, para o loop e chama prisma.$disconnect (modelo de src/server.t… | TRANSCRICAO | [09:11] Larissa |
 | FDD-RES-09 | `docs/FDD.md` | Resiliência | Isolamento entre endpoints: Uma linha por evento × webhook: o retry de um endpoint não atrasa os outros | TRANSCRICAO | [09:44] Sofia |
 | FDD-RES-10 | `docs/FDD.md` | Limitação | Ordem por pedido só na 1ª tentativa; evento em retry pode ser ultrapassado | TRANSCRICAO | [09:12] Diego |
-| FDD-OBS-01 | `docs/FDD.md` | Observabilidade | Logs estruturados Pino: enqueued, succeeded, failed, moved_to_dlq, secret_rotated, worker_cycle | CODIGO | `src/shared/logger/index.ts` |
+| FDD-OBS-01 | `docs/FDD.md` | Observabilidade — proposta | Logs estruturados Pino: enqueued, succeeded, failed, moved_to_dlq, secret_rotated, worker_cycle | CODIGO | `src/shared/logger/index.ts` |
 | FDD-OBS-02 | `docs/FDD.md` | Observabilidade | Log de auditoria webhook_dlq_replayed com userId | TRANSCRICAO | [09:36] Sofia |
-| FDD-OBS-03 | `docs/FDD.md` | Observabilidade | Redact de.secret e.previousSecret no logger | TRANSCRICAO | [09:22] Diego |
-| FDD-OBS-04 | `docs/FDD.md` | Observabilidade | Métricas (proposta): pendentes, idade do pendente mais antigo vs. 10 s, sucesso, p95, DLQ/dia | TRANSCRICAO | [09:02] Marcos |
+| FDD-OBS-03 | `docs/FDD.md` | Observabilidade — proposta | Redact dos campos secret e previousSecret no logger | TRANSCRICAO | [09:22] Diego |
+| FDD-OBS-04 | `docs/FDD.md` | Observabilidade — proposta | Métricas (proposta): pendentes, idade do pendente mais antigo vs. 10 s, sucesso, p95, DLQ/dia | TRANSCRICAO | [09:02] Marcos |
 | FDD-OBS-05 | `docs/FDD.md` | Observabilidade | Métrica de volume por customer como insumo para decidir rate limiting | TRANSCRICAO | [09:39] Larissa |
-| FDD-OBS-06 | `docs/FDD.md` | Observabilidade | Tracing (proposta): correlação requestId → eventId → webhookId, sem OpenTelemetry | CODIGO | `src/middlewares/request-logger.middleware.ts` |
-| FDD-SEG-01 | `docs/FDD.md` | Segurança | HMAC-SHA256 do corpo com node:crypto; comparação com timingSafeEqual (proposta) | TRANSCRICAO | [09:22] Sofia |
-| FDD-SEG-02 | `docs/FDD.md` | Segurança | Secret gerada com randomBytes(32), prefixo whsec_ (proposta) | TRANSCRICAO | [09:31] Marcos |
+| FDD-OBS-06 | `docs/FDD.md` | Observabilidade — proposta | Tracing (proposta): correlação requestId → eventId → webhookId, sem OpenTelemetry | CODIGO | `src/middlewares/request-logger.middleware.ts` |
+| FDD-SEG-01 | `docs/FDD.md` | Segurança — proposta | HMAC-SHA256 do corpo com node:crypto; comparação com timingSafeEqual (proposta) | TRANSCRICAO | [09:22] Sofia |
+| FDD-SEG-02 | `docs/FDD.md` | Segurança — proposta | Secret gerada com randomBytes(32), prefixo whsec_ (proposta) | TRANSCRICAO | [09:31] Marcos |
 | FDD-SEG-03 | `docs/FDD.md` | Segurança | Armazenamento da secret: coluna própria, nunca devolvida, mascarada; criptografia em repouso para a revisão | TRANSCRICAO | [09:46] Sofia |
 | FDD-SEG-04 | `docs/FDD.md` | Segurança | https obrigatório no schema Zod | TRANSCRICAO | [09:23] Sofia |
 | FDD-SEG-05 | `docs/FDD.md` | Segurança | Replay restrito a ADMIN e auditado | TRANSCRICAO | [09:36] Sofia |
@@ -290,11 +283,11 @@ Liga cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [ADRs
 | FDD-DEP-05 | `docs/FDD.md` | Dependência / Compatibilidade | Clientes validam X-Signature e deduplicam por X-Event-Id; portal documenta | TRANSCRICAO | [09:26] Marcos |
 | FDD-RISK-01 | `docs/FDD.md` | Risco | Eventos fora de ordem quando há retry (§8) — P: Média, I: Médio | TRANSCRICAO | [09:12] Diego |
 | FDD-RISK-02 | `docs/FDD.md` | Risco | Vazamento da secret armazenada na plataforma (o vazamento do lado do cliente está no PRD) — P: Baixa, I: Alto | TRANSCRICAO | [09:46] Sofia |
-| FDD-RISK-03 | `docs/FDD.md` | Risco | Worker parado sem ninguém perceber — P: Média, I: Alto | TRANSCRICAO | [09:11] Diego |
+| FDD-RISK-03 | `docs/FDD.md` | Risco — proposta | Worker parado sem ninguém perceber — P: Média, I: Alto | TRANSCRICAO | [09:11] Diego |
 | FDD-RISK-04 | `docs/FDD.md` | Risco | changeStatus fica mais lento — P: Baixa, I: Médio | TRANSCRICAO | [09:04] Bruno |
 | FDD-RISK-05 | `docs/FDD.md` | Risco | Crescimento contínuo da outbox e das deliveries — P: Alta, I: Baixo | TRANSCRICAO | [09:08] Diego |
 | FDD-RISK-06 | `docs/FDD.md` | Risco | CRUD sem vínculo usuário ↔ customer — P: Média, I: Médio | TRANSCRICAO | [09:37] Sofia |
-| FDD-RISK-07 | `docs/FDD.md` | Risco | Admin sem forma de descobrir ids da DLQ (não há endpoint de listagem) — P: Alta, I: Baixo | TRANSCRICAO | [09:18] Diego |
+| FDD-RISK-07 | `docs/FDD.md` | Risco — proposta | Admin sem forma de descobrir ids da DLQ (não há endpoint de listagem) — P: Alta, I: Baixo | TRANSCRICAO | [09:18] Diego |
 | FDD-TEST-01 | `docs/FDD.md` | Teste | Unit: Tabela de backoff: o attempts 1..5 dá o nextAttemptAt correto e o 6 vai para a DLQ | TRANSCRICAO | [09:17] Diego |
 | FDD-TEST-02 | `docs/FDD.md` | Teste | Unit: sign(secret, body) bate com um vetor conhecido de HMAC-SHA256; alterar o corpo invalida a assinatura; durante a rotaçã… | TRANSCRICAO | [09:22] Sofia |
 | FDD-TEST-03 | `docs/FDD.md` | Teste | Unit: Filtro: um endpoint que não ouve to não recebe linha | TRANSCRICAO | [09:34] Bruno |
@@ -305,16 +298,7 @@ Liga cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [ADRs
 | FDD-TEST-08 | `docs/FDD.md` | Teste | Integração: Seis falhas levam a FAILED + linha na DLQ; replay como OPERATOR → 403; como ADMIN → 202 com o mesmo eventId | TRANSCRICAO | [09:36] Sofia |
 | FDD-TEST-09 | `docs/FDD.md` | Teste | Contrato: POST /webhooks com http:// → 400; a secret só aparece em 201 e no rotate | TRANSCRICAO | [09:23] Sofia |
 | FDD-TEST-10 | `docs/FDD.md` | Teste | Segurança: Revisão manual da Sofia sobre HMAC e geração de secret, com 2 dias úteis antes do deploy | TRANSCRICAO | [09:46] Sofia |
-| FDD-AC-01 | `docs/FDD.md` | Critério de aceite técnico | Outbox na mesma transação; falha desfaz a mudança | TRANSCRICAO | [09:40] Bruno |
-| FDD-AC-02 | `docs/FDD.md` | Critério de aceite técnico | Nenhum evento para endpoint que não ouve o status ou inativo | TRANSCRICAO | [09:34] Bruno |
-| FDD-AC-03 | `docs/FDD.md` | Critério de aceite técnico | Envio em ≤ 2 s após o commit | TRANSCRICAO | [09:09] Diego |
-| FDD-AC-04 | `docs/FDD.md` | Critério de aceite técnico | Payload e 5 headers com assinatura válida | TRANSCRICAO | [09:44] Diego |
-| FDD-AC-05 | `docs/FDD.md` | Critério de aceite técnico | Retry 1m/5m/30m/2h/12h e DLQ após 6º envio | TRANSCRICAO | [09:17] Larissa |
-| FDD-AC-06 | `docs/FDD.md` | Critério de aceite técnico | Payload > 64 KB vai para a DLQ | TRANSCRICAO | [09:24] Larissa |
-| FDD-AC-07 | `docs/FDD.md` | Critério de aceite técnico | Replay ADMIN com mesmo eventId e userId no log | TRANSCRICAO | [09:36] Sofia |
-| FDD-AC-08 | `docs/FDD.md` | Critério de aceite técnico | Rotação com 24 h de carência | TRANSCRICAO | [09:21] Sofia |
-| FDD-AC-09 | `docs/FDD.md` | Critério de aceite técnico | URL http:// recusada com 400 | TRANSCRICAO | [09:23] Sofia |
-| FDD-AC-10 | `docs/FDD.md` | Critério de aceite técnico | Erros WEBHOOK_ via error.middleware sem alteração | TRANSCRICAO | [09:29] Bruno |
-| FDD-AC-11 | `docs/FDD.md` | Critério de aceite técnico | Worker via npm run worker com PrismaClient próprio | TRANSCRICAO | [09:11] Larissa |
-| FDD-AC-12 | `docs/FDD.md` | Critério de aceite técnico | Secret ausente de logs e respostas | TRANSCRICAO | [09:22] Diego |
-| FDD-AC-13 | `docs/FDD.md` | Critério de aceite técnico | Testes passando e revisão da Sofia concluída | TRANSCRICAO | [09:46] Sofia |
+| FDD-AC-01 | `docs/FDD.md` | Critério de aceite técnico | Transação e filtro: outbox na mesma transação (falha desfaz a mudança); nada para endpoint que não ouve o status ou inativo;… | TRANSCRICAO | [09:40] Bruno |
+| FDD-AC-02 | `docs/FDD.md` | Critério de aceite técnico | Contrato e segurança: payload e 5 headers com assinatura válida; rotação com 24 h de carência; http:// → 400; secret fora de… | TRANSCRICAO | [09:44] Diego |
+| FDD-AC-03 | `docs/FDD.md` | Critério de aceite técnico | Falhas: retry 1m/5m/30m/2h/12h e DLQ após o 6º envio; payload > 64 KB → DLQ; replay ADMIN com mesmo eventId e userId no log | TRANSCRICAO | [09:17] Larissa |
+| FDD-AC-04 | `docs/FDD.md` | Critério de aceite técnico | Padrões e operação: erros WEBHOOK_ via error.middleware sem alteração; worker via npm run worker com PrismaClient próprio; t… | TRANSCRICAO | [09:30] Larissa |
