@@ -17,7 +17,7 @@ Com retries ([ADR-003](ADR-003-retry-backoff-e-dlq.md)), existem cenários em qu
 4. O comportamento **será documentado em destaque** no portal do desenvolvedor ([09:26] Marcos).
 5. O header **`X-Webhook-Id`** acompanha o envio para identificar qual cadastro originou a chamada, útil para clientes com vários endpoints ([09:44] Sofia, [09:45] Diego).
 
-> **Proposta de design (AMB-03, pendente de confirmação):** como o filtro de status é por webhook e cada envio leva um `X-Webhook-Id`, propomos **uma linha de outbox por par (evento × webhook)**. Cada linha tem seu próprio `event_id`, retry e destino de DLQ. Assim, uma falha em um endpoint não atrasa os outros endpoints do mesmo cliente. O modelo exato fica no FDD.
+> **Decisão de design (AMB-03), definida na revisão desta documentação em 2026-10-15:** como o filtro de status é por webhook e cada envio leva um `X-Webhook-Id`, adota-se **uma linha de outbox por par (evento × webhook)**. Cada linha tem seu próprio `event_id`, retry e destino de DLQ. Assim, uma falha em um endpoint não atrasa os outros endpoints do mesmo cliente. O modelo exato fica no FDD.
 
 ## Alternativas Consideradas
 

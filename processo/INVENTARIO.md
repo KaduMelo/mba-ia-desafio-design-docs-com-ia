@@ -202,14 +202,14 @@ Convenção de IDs: `DEC` decisão · `RF` requisito funcional · `RNF` requisit
 
 ---
 
-## Ambiguidades (não decididas na reunião — o design deve explicitar a escolha como proposta)
+## Ambiguidades (não decididas na reunião; as resolvidas na revisão estão marcadas como **Resolvido**)
 
 | ID | Ambiguidade | Evidência | Origem |
 |----|-------------|-----------|--------|
-| AMB-01 | **"5 tentativas" com 5 intervalos**: 1 envio + 5 retries (6 chamadas) ou 5 chamadas no total? A soma de ~15h só fecha com 5 intervalos após a 1ª falha | "teto de tentativas" e "5" vs. lista de 5 intervalos e "~15 horas entre primeira falha e última tentativa" | [09:15] Diego, [09:17] Diego, [09:48] Larissa |
+| AMB-01 | **"5 tentativas" com 5 intervalos**: 1 envio + 5 retries (6 chamadas) ou 5 chamadas no total? A soma de ~15h só fecha com 5 intervalos após a 1ª falha **Resolvido (2026-10-15):** 1 envio + 5 retries. | "teto de tentativas" e "5" vs. lista de 5 intervalos e "~15 horas entre primeira falha e última tentativa" | [09:15] Diego, [09:17] Diego, [09:48] Larissa |
 | AMB-02 | Status "falhou" na outbox coexistindo com a DLQ separada: significa "falhou, aguardando retry"? | Lista de status vs. DLQ em tabela própria | [09:08] Diego, [09:18] Diego |
-| AMB-03 | **Uma linha na outbox por evento ou por (evento × webhook)?** O cliente pode ter vários cadastros (`X-Webhook-Id`) e o filtro é por webhook | Filtro "se nenhum webhook do customer quer" + header por webhook + event_id "único por evento" | [09:25] Diego, [09:34] Bruno, [09:44] Sofia |
-| AMB-04 | A **criação do pedido** (`null → PENDING`) gera evento? A reunião só fala de `changeStatus` | `create()` grava history sem passar por `changeStatus` | `src/modules/orders/order.service.ts:95-113`, [09:40] Bruno |
+| AMB-03 | **Uma linha na outbox por evento ou por (evento × webhook)?** O cliente pode ter vários cadastros (`X-Webhook-Id`) e o filtro é por webhook **Resolvido (2026-10-15):** 1 linha por evento × webhook. | Filtro "se nenhum webhook do customer quer" + header por webhook + event_id "único por evento" | [09:25] Diego, [09:34] Bruno, [09:44] Sofia |
+| AMB-04 | A **criação do pedido** (`null → PENDING`) gera evento? A reunião só fala de `changeStatus` **Resolvido (2026-10-15):** não gera evento nesta fase. | `create()` grava history sem passar por `changeStatus` | `src/modules/orders/order.service.ts:95-113`, [09:40] Bruno |
 | AMB-05 | **Vínculo usuário ↔ customer** não existe no código: qualquer usuário autenticado pode gerenciar webhooks de qualquer customer | Coerente com DEC-27 e OPEN-04, mas precisa estar explícito como risco | `prisma/schema.prisma:25-38`, [09:32] Marcos, [09:37] Sofia |
 | AMB-06 | `customer_id` no **body ou no path**: não foi escolhido | "passado no body ou no path" | [09:32] Larissa |
 | AMB-07 | Como a secret é **armazenada e protegida** (inclusive dos logs) não foi discutido; houve caso de vazamento em log de cliente | Redact atual do Pino não inclui `secret` | [09:22] Diego, `src/shared/logger/index.ts:4-11` |
