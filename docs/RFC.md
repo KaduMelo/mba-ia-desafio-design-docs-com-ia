@@ -6,7 +6,7 @@
 | **Status** | Em revisão |
 | **Data** | 2026-10-15 (consolida a reunião técnica de quinta-feira, 09:00) |
 | **Revisores** | Marcos (PM), Bruno (Eng. Pleno, Pedidos), Diego (Eng. Sênior, Plataforma), Sofia (Eng. de Segurança) |
-| **Documentos relacionados** | [PRD](PRD.md) · [FDD](FDD.md) · [ADRs](adrs/README.md) |
+| **Documentos relacionados** | [PRD](PRD.md) · [FDD](FDD.md) · [ADRs](adrs/README.md) · [Tracker](TRACKER.md) |
 
 ---
 
