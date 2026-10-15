@@ -9,7 +9,7 @@ Liga cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [ADRs
 - Quando o item cita várias falas, a localização aponta a **principal**. As demais estão no próprio documento.
 - Itens marcados nos documentos como *(proposta)* não foram decididos na reunião. A localização deles aponta a fala ou o arquivo que **motivou** a proposta, e o resumo deixa claro que é proposta.
 
-**Totais:** 289 linhas · 247 com fonte `TRANSCRICAO` (85%) · 42 com fonte `CODIGO` (15%).
+**Totais:** 284 linhas · 242 com fonte `TRANSCRICAO` (85%) · 42 com fonte `CODIGO` (15%).
 
 | ID | Documento | Tipo | Conteúdo (resumo) | Fonte | Localização |
 |---|---|---|---|---|---|
@@ -56,7 +56,7 @@ Liga cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [ADRs
 | PRD-FR-07 | `docs/PRD.md` | Requisito Funcional | Cada webhook só recebe os status que escolheu ouvir | TRANSCRICAO | [09:33] Marcos |
 | PRD-FR-08 | `docs/PRD.md` | Requisito Funcional | O cliente pode pedir uma nova secret pela API. A anterior continua válida por 24 h | TRANSCRICAO | [09:21] Sofia |
 | PRD-FR-09 | `docs/PRD.md` | Requisito Funcional | O cliente consulta as últimas 100 entregas de um webhook, com sucesso ou falha, payload, resposta e tempo de resposta | TRANSCRICAO | [09:34] Marcos |
-| PRD-FR-10 | `docs/PRD.md` | Requisito Funcional | Notificações que falham são retentadas automaticamente com intervalos crescentes. Depois do limite, vão para uma fila de fal… | TRANSCRICAO | [09:15] Diego |
+| PRD-FR-10 | `docs/PRD.md` | Requisito Funcional | Notificações que falham por motivo transitório (ex.: cliente fora do ar) são retentadas automaticamente com intervalos cresc… | TRANSCRICAO | [09:15] Diego |
 | PRD-FR-11 | `docs/PRD.md` | Requisito Funcional | Um ADMIN reprocessa uma notificação da DLQ | TRANSCRICAO | [09:18] Diego |
 | PRD-FR-12 | `docs/PRD.md` | Requisito Funcional | O reprocessamento registra quem o executou | TRANSCRICAO | [09:36] Sofia |
 | PRD-FR-13 | `docs/PRD.md` | Requisito Funcional | Cada notificação traz um identificador único do evento, para o cliente descartar duplicatas | TRANSCRICAO | [09:25] Diego |
@@ -183,14 +183,9 @@ Liga cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [ADRs
 | FDD-OT-3 | `docs/FDD.md` | Objetivo técnico | Nenhum evento perdido por indisponibilidade do cliente — 1 envio + 5 retentativas (~15 h) e depois DLQ | TRANSCRICAO | [09:17] Larissa |
 | FDD-OT-4 | `docs/FDD.md` | Objetivo técnico | Autenticidade e integridade verificáveis pelo cliente — HMAC-SHA256 com secret por endpoint | TRANSCRICAO | [09:22] Sofia |
 | FDD-OT-5 | `docs/FDD.md` | Objetivo técnico | Zero infraestrutura nova e zero dependência nova — Mesmo MySQL, Prisma, Pino, Zod e uuid já instalados | TRANSCRICAO | [09:07] Diego |
-| FDD-OUT-01 | `docs/FDD.md` | Exclusão | Webhooks inbound | TRANSCRICAO | [09:02] Marcos |
-| FDD-OUT-02 | `docs/FDD.md` | Exclusão | Email de alerta ao cliente | TRANSCRICAO | [09:37] Larissa |
-| FDD-OUT-03 | `docs/FDD.md` | Exclusão | Dashboard visual | TRANSCRICAO | [09:40] Larissa |
-| FDD-OUT-04 | `docs/FDD.md` | Exclusão | Rate limiting de saída (observar) | TRANSCRICAO | [09:39] Larissa |
-| FDD-OUT-05 | `docs/FDD.md` | Exclusão | Múltiplos workers | TRANSCRICAO | [09:13] Diego |
-| FDD-OUT-06 | `docs/FDD.md` | Exclusão | Arquivamento de linhas após ~30 dias | TRANSCRICAO | [09:08] Diego |
-| FDD-OUT-07 | `docs/FDD.md` | Exclusão | Evento na criação do pedido (create, order.service.ts:95-113) | TRANSCRICAO | [09:40] Bruno |
-| FDD-OUT-08 | `docs/FDD.md` | Exclusão | Endpoint para listar a DLQ (a reunião só definiu o replay por id; questão em aberto Q6 do RFC) | TRANSCRICAO | [09:18] Diego |
+| FDD-OUT-01 | `docs/FDD.md` | Exclusão | Múltiplos workers em paralelo | TRANSCRICAO | [09:13] Diego |
+| FDD-OUT-02 | `docs/FDD.md` | Exclusão | Evento na criação do pedido (create, order.service.ts:95-113) | TRANSCRICAO | [09:40] Bruno |
+| FDD-OUT-03 | `docs/FDD.md` | Exclusão | Endpoint para listar a DLQ (a reunião só definiu o replay por id; questão em aberto Q6 do RFC) | TRANSCRICAO | [09:18] Diego |
 | FDD-DADOS-01 | `docs/FDD.md` | Modelo de dados | Model WebhookEndpoint: url, events (Json), secret, previousSecret + expiração, active, deletedAt | TRANSCRICAO | [09:21] Bruno |
 | FDD-DADOS-02 | `docs/FDD.md` | Modelo de dados | Model WebhookOutbox: eventId único, payload snapshot, status, attempts, nextAttemptAt; índices status/createdAt | TRANSCRICAO | [09:08] Diego |
 | FDD-DADOS-03 | `docs/FDD.md` | Modelo de dados | Model WebhookDelivery: tentativa, sucesso, status/corpo da resposta, durationMs | TRANSCRICAO | [09:34] Marcos |
@@ -272,7 +267,7 @@ Liga cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [ADRs
 | FDD-INT-14 | `docs/FDD.md` | Integração com código existente | Mesmo DATABASE_URL e LOG_LEVEL. Nenhuma variável nova é obrigatória: intervalos, lote e timeout são constantes do módulo (pr… | CODIGO | `src/config/env.ts` |
 | FDD-INT-15 | `docs/FDD.md` | Integração com código existente | Mesmo logger na API e no worker. Acrescentar.secret e.previousSecret em redactPaths (linhas 4–11) | CODIGO | `src/shared/logger/index.ts` |
 | FDD-INT-16 | `docs/FDD.md` | Integração com código existente | paginated (linha 22) na listagem de webhooks | CODIGO | `src/shared/http/response.ts` |
-| FDD-INT-17 | `docs/FDD.md` | Integração com código existente | Novos scripts: "worker": "tsx watch --env-file=.env src/worker.ts" e "start:worker": "node --env-file=.env dist/worker.js",… | CODIGO | `package.json` |
+| FDD-INT-17 | `docs/FDD.md` | Integração com código existente | Novos scripts: "worker": "tsx watch --env-file=.env src/worker.ts" (entry-point a criar) e "start:worker": "node --env-file=… | CODIGO | `package.json` |
 | FDD-INT-18 | `docs/FDD.md` | Integração com código existente | Incluir webhookDelivery, webhookDeadLetter, webhookOutbox e webhookEndpoint no deleteMany do beforeEach (linhas 8–16), antes… | CODIGO | `tests/setup.ts` |
 | FDD-INT-19 | `docs/FDD.md` | Integração com código existente | Novos casos ao lado de "transitions PENDING -> PAID" (linha 59). Ver §14 | CODIGO | `tests/orders.test.ts` |
 | FDD-INT-NOVOS | `docs/FDD.md` | Integração (arquivos novos) | Arquivos a criar: src/modules/webhooks/ (controller, service, repository, routes, schemas, publisher, processor, signature)… | TRANSCRICAO | [09:28] Bruno |

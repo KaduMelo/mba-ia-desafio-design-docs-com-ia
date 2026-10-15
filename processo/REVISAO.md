@@ -79,6 +79,16 @@ Ele foi corrigido antes desta execução.
 - **Links e âncoras:** todos válidos entre PRD, RFC, FDD, Tracker e ADRs.
 - **Código intocado:** `git diff --stat e7f6311 -- src prisma tests TRANSCRICAO.md` está vazio.
 
-## 4. Decisão do revisor
+## 4. Decisão do revisor e resultado
 
-Preencher: quais achados corrigir (A1–A4, A6) e como.
+**Decisão:** corrigir A1–A4 e regenerar o Tracker (A6). A5 fica para a Fase 7.
+
+| # | Correção aplicada |
+|---|---|
+| A1 | ADR-003 ganhou o item "falhas definitivas vão direto para a DLQ", com link para o FDD §5.3. O TL;DR e o item 4 da proposta do RFC agora distinguem falha transitória de definitiva. O PRD-FR-10 foi reescrito no mesmo sentido. |
+| A2 | O FDD §3 ficou só com as exclusões técnicas (múltiplos workers, evento na criação, listagem da DLQ) e um link para o PRD §5.2. |
+| A3 | ADR-003 item 1: "5 retentativas após o envio inicial". |
+| A4 | Marca "(a criar)" no diagrama e no script do FDD, em cada item da lista de arquivos novos e na referência do ADR-002. |
+| A6 | Tracker regenerado: 284 linhas, 85,2% TRANSCRICAO, 42 CODIGO, 0 erros. A remoção de linhas duplicadas mudou o ID do item "evento na criação". Em vez de uma exceção no gerador, o timestamp ([09:40] Bruno) foi colocado no próprio FDD. |
+
+**Checagem depois das correções:** 25 de 27 critérios OK. As 2 falhas restantes são do README (Fase 7). Nenhum caminho inexistente sem marca e nenhum link quebrado.

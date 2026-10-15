@@ -11,9 +11,10 @@ O endpoint do cliente pode estar fora do ar, lento ou em manutenção. Já houve
 
 ## Decisão
 
-1. **Backoff exponencial com 5 tentativas**, nos intervalos **1 min → 5 min → 30 min → 2 h → 12 h**. São cerca de 15 horas entre a primeira falha e a última tentativa ([09:15] Diego, [09:17] Diego, [09:17] Larissa).
+1. **Backoff exponencial com 5 retentativas após o envio inicial**, nos intervalos **1 min → 5 min → 30 min → 2 h → 12 h**. São cerca de 15 horas entre a primeira falha e a última tentativa ([09:15] Diego, [09:17] Diego, [09:17] Larissa).
 2. **Um timeout de 10 s** na chamada HTTP conta como falha e entra no retry ([09:42] Diego).
 3. **Esgotadas as tentativas, o evento vai para a DLQ**, a tabela separada `webhook_dead_letter`. Ela guarda o payload, o motivo da falha e o timestamp ([09:18] Diego).
+   **Falhas definitivas vão direto para a DLQ, sem retry** *(proposta de design)*: respostas 3xx e 4xx (exceto 408 e 429), payload acima de 64 KB e endpoint inativo. Repetir a requisição não muda o resultado. A classificação completa está no [FDD §5.3](../FDD.md#53-retry).
 4. **Replay manual** via `POST /admin/webhooks/dead-letter/:id/replay`. O replay recoloca o evento na outbox como pendente ([09:18] Diego, [09:35] Diego).
 5. O replay **exige role `ADMIN`** (reaproveita o `requireRole`, ver [ADR-006](ADR-006-reuso-dos-padroes-do-projeto.md)) e **registra em log quem o executou**, para auditoria ([09:36] Sofia, [09:36] Larissa).
 

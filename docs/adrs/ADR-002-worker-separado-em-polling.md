@@ -45,7 +45,7 @@ Para os clientes, "tempo real" é qualquer coisa abaixo de 10 segundos ([09:02] 
 ## Referências
 
 - [09:08] Larissa, [09:09] Diego, [09:09] Bruno, [09:10] Marcos, [09:10] Larissa: polling de 2 s
-- [09:11] Diego, [09:11] Larissa, [09:11] Bruno, [09:28] Bruno: processo separado e `src/worker.ts`
+- [09:11] Diego, [09:11] Larissa, [09:11] Bruno, [09:28] Bruno: processo separado e `src/worker.ts` (a criar)
 - [09:12] Larissa, [09:12] Diego, [09:13] Bruno, [09:13] Diego, [09:13] Larissa, [09:14] Marcos: ordem e single-worker
 - [09:29] Diego, [09:30] Bruno: PrismaClient próprio
 - `src/server.ts`, `src/config/database.ts`, `src/config/env.ts`

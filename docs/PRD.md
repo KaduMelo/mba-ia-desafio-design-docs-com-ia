@@ -97,7 +97,7 @@ O O5 não teve meta definida na reunião, mas mede o problema descrito em [09:00
 | PRD-FR-07 | Cada webhook só recebe os status que escolheu ouvir | [09:33] Marcos, [09:34] Bruno |
 | PRD-FR-08 | O cliente pode pedir uma nova secret pela API. A anterior continua válida por 24 h | [09:21] Sofia |
 | PRD-FR-09 | O cliente consulta as últimas 100 entregas de um webhook, com sucesso ou falha, payload, resposta e tempo de resposta | [09:34] Marcos |
-| PRD-FR-10 | Notificações que falham são retentadas automaticamente com intervalos crescentes. Depois do limite, vão para uma fila de falhas (DLQ) | [09:15] Diego, [09:17] Larissa |
+| PRD-FR-10 | Notificações que falham por motivo transitório (ex.: cliente fora do ar) são retentadas automaticamente com intervalos crescentes. Depois do limite, ou em falhas definitivas (ex.: cliente recusa a requisição), vão para uma fila de falhas (DLQ) | [09:15] Diego, [09:17] Larissa |
 | PRD-FR-11 | Um ADMIN reprocessa uma notificação da DLQ | [09:18] Diego, [09:35] Diego |
 | PRD-FR-12 | O reprocessamento registra quem o executou | [09:36] Sofia |
 | PRD-FR-13 | Cada notificação traz um identificador único do evento, para o cliente descartar duplicatas | [09:25] Diego |
