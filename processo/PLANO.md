@@ -93,10 +93,10 @@ seção "Iterações e ajustes" do README).
 4. **Feche a fase** com este prompt (troque N e a branch):
 
 ```
-Fase N revisada. Registre em processo/LOG-ITERACOES.md as correções feitas nesta fase (o que a IA errou, como detectei, como corrigi), faça o commit "docs: log de iterações da fase N" na branch atual, depois git switch main && git merge --no-ff <branch> -m "Merge fase N: <descrição>", confirme com git log --oneline --graph -5 que o merge entrou e faça git push origin main <branch>.
+Fase N revisada. Registre em processo/LOG-ITERACOES.md as correções feitas nesta fase (o que a IA errou, como detectei, como corrigi), faça o commit "docs: log de iterações da fase N" na branch atual, faça git push -u origin <branch>, abra o PR no fork com gh pr create --repo KaduMelo/mba-ia-desafio-design-docs-com-ia --base main --head <branch> (título "Fase N: <descrição>", corpo com resumo e pontos de revisão), faça o merge com gh pr merge --merge e depois git switch main && git pull.
 ```
 
-5. Siga para a próxima fase. O push para o fork (`origin`) acontece no fechamento de **cada** fase: a `main` e a branch da fase.
+5. Siga para a próxima fase. O fechamento de **cada** fase faz push da branch, abre um PR no fork (`KaduMelo/...`, **nunca** no repositório original `devfullcycle`) e faz o merge por ele.
 
 > Por que parar antes do merge: o enunciado espera de 3 a 5 ciclos de revisão. Se o merge acontecer junto
 > com a geração, a `main` recebe conteúdo que você ainda não revisou, e o histórico deixa de mostrar as iterações.
