@@ -93,10 +93,10 @@ seção "Iterações e ajustes" do README).
 4. **Feche a fase** com este prompt (troque N e a branch):
 
 ```
-Fase N revisada. Registre em processo/LOG-ITERACOES.md as correções feitas nesta fase (o que a IA errou, como detectei, como corrigi), faça o commit "docs: log de iterações da fase N" na branch atual, depois git switch main && git merge --no-ff <branch> -m "Merge fase N: <descrição>" e confirme com git log --oneline --graph -5 que o merge entrou. Não fazer push.
+Fase N revisada. Registre em processo/LOG-ITERACOES.md as correções feitas nesta fase (o que a IA errou, como detectei, como corrigi), faça o commit "docs: log de iterações da fase N" na branch atual, depois git switch main && git merge --no-ff <branch> -m "Merge fase N: <descrição>", confirme com git log --oneline --graph -5 que o merge entrou e faça git push origin main <branch>.
 ```
 
-5. Siga para a próxima fase. O push para o fork acontece só na Fase 8.
+5. Siga para a próxima fase. O push para o fork (`origin`) acontece no fechamento de **cada** fase: a `main` e a branch da fase.
 
 > Por que parar antes do merge: o enunciado espera de 3 a 5 ciclos de revisão. Se o merge acontecer junto
 > com a geração, a `main` recebe conteúdo que você ainda não revisou, e o histórico deixa de mostrar as iterações.
