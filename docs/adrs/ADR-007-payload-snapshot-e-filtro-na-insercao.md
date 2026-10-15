@@ -20,7 +20,7 @@ O payload pode ficar horas na outbox por causa dos retries ([ADR-003](ADR-003-re
 2. **Filtro na inserção.** `publishWebhookEvent` só insere eventos para os webhooks ativos do customer que ouvem o `to_status`. Se nenhum quiser aquele status, nada é inserido ([09:34] Bruno, [09:34] Diego).
 3. **Payload enxuto:** dados de identificação e de status do pedido, como `order_id`, `order_number`, `from_status`, `to_status`, `customer_id` e `total_cents`, **sem os itens**. Quem precisar de detalhes consulta `GET /orders/:id` ([09:43] Diego, [09:44] Bruno). O contrato exato fica no FDD.
 
-> **Proposta de design (AMB-04, pendente de confirmação):** a reunião tratou apenas de `changeStatus` ([09:40] Bruno). A criação do pedido (`create()` em `src/modules/orders/order.service.ts`, que grava o histórico `null → PENDING`) **não gera evento** nesta fase. Fica registrado como questão em aberto.
+> **Decisão de escopo (AMB-04), definida na revisão desta documentação em 2026-10-15:** a reunião tratou apenas de `changeStatus` ([09:40] Bruno). A criação do pedido (`create()` em `src/modules/orders/order.service.ts`, que grava o histórico `null → PENDING`) **não gera evento** nesta fase. Incluir a criação depende de validação do PM com os clientes.
 
 ## Alternativas Consideradas
 

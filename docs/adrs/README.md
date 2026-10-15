@@ -14,6 +14,6 @@ Todas as decisões vêm da reunião técnica registrada em [`TRANSCRICAO.md`](..
 | [ADR-006](ADR-006-reuso-dos-padroes-do-projeto.md) | Reuso dos padrões existentes do projeto | Aceito |
 | [ADR-007](ADR-007-payload-snapshot-e-filtro-na-insercao.md) | Payload como snapshot e filtro de status na inserção | Aceito |
 
-As decisões marcadas dentro dos ADRs como **"Proposta de design (AMB-xx)"** são interpretações de pontos
-ambíguos da reunião e aguardam confirmação. Ver a tabela de ambiguidades em
+Os blocos **"Decisão de design/escopo (AMB-xx)"** dentro dos ADRs resolvem pontos que a reunião deixou
+ambíguos. Eles foram definidos na revisão desta documentação, a partir das falas citadas. Ver a tabela de ambiguidades em
 [`processo/INVENTARIO.md`](../../processo/INVENTARIO.md).

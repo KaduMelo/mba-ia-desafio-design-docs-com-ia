@@ -17,7 +17,7 @@ O endpoint do cliente pode estar fora do ar, lento ou em manutenção. Já houve
 4. **Replay manual** via `POST /admin/webhooks/dead-letter/:id/replay`. O replay recoloca o evento na outbox como pendente ([09:18] Diego, [09:35] Diego).
 5. O replay **exige role `ADMIN`** (reaproveita o `requireRole`, ver [ADR-006](ADR-006-reuso-dos-padroes-do-projeto.md)) e **registra em log quem o executou**, para auditoria ([09:36] Sofia, [09:36] Larissa).
 
-> **Proposta de design (AMB-01, pendente de confirmação):** a reunião fala em "5 tentativas" e lista 5 intervalos. Interpretamos como **envio inicial + 5 retentativas**, uma após cada intervalo. É a única leitura em que os "~15 h entre a primeira falha e a última tentativa" ([09:17] Diego) fecham com os intervalos citados.
+> **Decisão de design (AMB-01), definida na revisão desta documentação em 2026-10-15:** a reunião fala em "5 tentativas" e lista 5 intervalos. Fica definido como **envio inicial + 5 retentativas**, uma após cada intervalo. É a única leitura em que os "~15 h entre a primeira falha e a última tentativa" ([09:17] Diego) fecham com os intervalos citados.
 
 ## Alternativas Consideradas
 

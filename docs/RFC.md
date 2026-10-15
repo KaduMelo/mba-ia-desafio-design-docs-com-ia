@@ -95,9 +95,14 @@ flowchart LR
 | Q3 | **Avisar o cliente por email** quando o webhook dele falha repetidamente | Próxima fase, depois de medir o impacto. | [09:37] Marcos, [09:37] Larissa |
 | Q4 | **Endurecer as permissões do CRUD de webhooks** (hoje vale qualquer usuário autenticado) | "Mais pra frente". Hoje o código não liga `User` a `Customer` (`prisma/schema.prisma`). | [09:37] Sofia |
 | Q5 | **Arquivamento** das linhas já entregues (~30 dias) | Fora do escopo desta feature, sem dono definido. | [09:08] Diego |
-| Q6 | **"5 tentativas" = envio inicial + 5 retentativas?** É a leitura que fecha com os ~15 h citados | Proposta no [ADR-003](adrs/ADR-003-retry-backoff-e-dlq.md); **confirmar** com Diego e Larissa. | [09:17] Diego, [09:48] Larissa |
-| Q7 | **Granularidade da outbox:** uma linha por evento ou por par (evento × webhook)? | Proposta: por par, no [ADR-005](adrs/ADR-005-entrega-at-least-once-com-x-event-id.md). **Confirmar.** | [09:34] Bruno, [09:44] Sofia |
-| Q8 | **Criação do pedido** (`null → PENDING`) deve gerar evento? | Proposta: não nesta fase ([ADR-007](adrs/ADR-007-payload-snapshot-e-filtro-na-insercao.md)). **Confirmar** com Marcos. | [09:40] Bruno |
+
+### 5.1 Ambiguidades da reunião resolvidas nesta revisão
+
+| # | Ponto ambíguo | Definição adotada | Origem |
+|---|---|---|---|
+| R1 | "5 tentativas" com 5 intervalos listados | **Envio inicial + 5 retentativas.** É a única leitura compatível com os ~15 h citados. → [ADR-003](adrs/ADR-003-retry-backoff-e-dlq.md) | [09:17] Diego, [09:48] Larissa |
+| R2 | Granularidade da outbox | **Uma linha por par evento × webhook**, com `event_id`, retry e DLQ próprios. → [ADR-005](adrs/ADR-005-entrega-at-least-once-com-x-event-id.md) | [09:34] Bruno, [09:44] Sofia |
+| R3 | Criação do pedido (`null → PENDING`) gera evento? | **Não nesta fase.** Só `changeStatus` publica. → [ADR-007](adrs/ADR-007-payload-snapshot-e-filtro-na-insercao.md) | [09:40] Bruno |
 
 ## 6. Impacto e riscos
 
@@ -109,13 +114,13 @@ flowchart LR
 
 **Riscos principais**
 
-| Risco | Mitigação proposta |
-|---|---|
-| Worker parado → entregas atrasam (single-worker é ponto único de falha) | Eventos persistem na outbox e nada se perde. Monitorar o tamanho da fila de pendentes (ver Observabilidade no FDD). |
-| Cliente não deduplica → processa eventos em dobro | Documentação em destaque no portal ([09:26] Marcos). `X-Event-Id` estável entre as tentativas. |
-| Vazamento de secret de cliente (já aconteceu, [09:22] Diego) | Secret por endpoint, rotação com 24 h de carência, revisão de segurança de 2 dias da Sofia ([09:46] Sofia). |
-| Inserção na outbox falha → mudança de status falha | É o comportamento desejado para garantir consistência. A inserção é simples e indexada. |
-| Prazo: a Atlas quer a funcionalidade até o fim de novembro | Escopo enxuto, com email, dashboard e rate limiting fora. Estimativa abaixo. |
+| Risco | Mitigação | Origem |
+|---|---|---|
+| Worker parado → entregas atrasam (single-worker é ponto único de falha) | Eventos persistem na outbox e nada se perde: o worker retoma de onde parou. Monitorar o tamanho da fila de pendentes (*proposta*, ver Observabilidade no FDD). | [09:11] Diego, [09:13] Larissa |
+| Cliente não deduplica → processa eventos em dobro | Documentação em destaque no portal. `X-Event-Id` estável entre as tentativas. | [09:25] Sofia, [09:26] Marcos |
+| Vazamento de secret de cliente (já aconteceu) | Secret por endpoint, rotação com 24 h de carência, revisão de segurança de 2 dias da Sofia. | [09:22] Diego, [09:21] Sofia, [09:46] Sofia |
+| Inserção na outbox falha → mudança de status falha | Comportamento desejado: rollback garante que não exista status sem evento. | [09:40] Bruno, [09:41] Diego |
+| Prazo: a Atlas quer a funcionalidade até o fim de novembro | Escopo enxuto, com email, dashboard e rate limiting fora. Estimativa abaixo. | [09:45] Marcos, [09:48] Larissa |
 
 **Cronograma estimado** ([09:46] Larissa): modelagem de outbox e DLQ, 1 sprint · worker e retry, 1 sprint · CRUD e deliveries, ½ sprint · integração no `order.service` e testes ponta a ponta, ½ sprint · HMAC, schemas e validações, mais um pouco. **Total: 3 sprints**, com **2 dias úteis de revisão de segurança** reservados no fim ([09:46] Sofia, [09:47] Larissa).
 
@@ -133,4 +138,4 @@ flowchart LR
 
 ---
 
-**Como revisar:** comente diretamente nas seções 3 a 5. As questões Q6 a Q8 precisam de resposta antes do início da implementação. As demais podem seguir em aberto nesta fase.
+**Como revisar:** comente diretamente nas seções 3 a 5. As questões Q1 a Q5 podem seguir em aberto nesta entrega. As definições R1 a R3 podem ser contestadas na revisão.
