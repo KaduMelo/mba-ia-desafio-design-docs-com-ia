@@ -68,9 +68,16 @@ por um Pull Request no fork. O histórico do git mostra cada etapa.
 
 ## Prompts customizados
 
-Os goals estão em [`processo/PLANO.md`](processo/PLANO.md). Abaixo, quatro dos que foram usados, com quebras
-de linha para facilitar a leitura. Os goals das Fases 0 e 1 foram colados literalmente na sessão. Das fases
-seguintes em diante, eu pedia "fase N" e a IA executava o goal correspondente do plano.
+Os goals ficam em [`processo/PLANO.md`](processo/PLANO.md). Eles foram estruturados no planejamento, com a IA
+como acelerador, e depois revisados e adaptados por mim ao que o desafio esperava, fase a fase. Algumas das
+adaptações:
+- incluir o fluxo de branch, PR no fork e merge em cada fase;
+- proibir links para documentos ainda vazios;
+- separar o diagnóstico da correção na revisão cruzada;
+- registrar cada ajuste no LOG antes do merge.
+
+Abaixo, quatro desses prompts, com quebras de linha para facilitar a leitura. Os goals das Fases 0 e 1 foram
+usados literalmente. Nas fases seguintes, eu acionava o goal correspondente do plano.
 
 **1. Fase 0: inventário como fonte única.** Este foi o prompt mais importante, porque cria a base contra
 alucinação.
@@ -183,7 +190,7 @@ são as entradas do LOG.
 ├── docs/
 │   ├── PRD.md                ← 1. por que e o quê (produto)
 │   ├── RFC.md                ← 2. proposta técnica, alternativas e questões em aberto
-│   ├── adrs/
+│   ├── adrs/                ← 3. uma decisão por arquivo
 │   │   ├── README.md         ← índice dos ADRs
 │   │   ├── ADR-001-outbox-no-mysql.md
 │   │   ├── ADR-002-worker-separado-em-polling.md
@@ -191,9 +198,9 @@ são as entradas do LOG.
 │   │   ├── ADR-004-hmac-sha256-com-secret-por-endpoint.md
 │   │   ├── ADR-005-entrega-at-least-once-com-x-event-id.md
 │   │   ├── ADR-006-reuso-dos-padroes-do-projeto.md
-│   │   └── ADR-007-payload-snapshot-e-filtro-na-insercao.md   ← 3. uma decisão por arquivo
+│   │   └── ADR-007-payload-snapshot-e-filtro-na-insercao.md
 │   ├── FDD.md                ← 4. como construir: contratos, erros, fluxos, integração com o código
-│   └── TRACKER.md            ← 5. de onde veio cada item (284 linhas)
+│   └── TRACKER.md            ← 5. de onde veio cada item (~280 linhas)
 ├── processo/                 ← bastidores da produção
 │   ├── PLANO.md              ← fases, goals, armadilhas da transcrição
 │   ├── INVENTARIO.md         ← fonte única de verdade extraída da reunião e do código
