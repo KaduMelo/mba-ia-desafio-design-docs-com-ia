@@ -85,6 +85,8 @@ além de leitura dirigida e da revisão cruzada da Fase 6 ([`REVISAO.md`](REVISA
 
 - O README dizia "7 ciclos / 24 ajustes", mas o LOG já tinha 25 entradas. O texto foi atualizado, e a tabela do Workflow ganhou o link do PR #7 e a linha da Fase 8.
 
+- Os diagramas mermaid foram renderizados com o `mermaid-cli` oficial. O diagrama do worker (FDD §5.2) falhava por causa de `;` dentro de uma mensagem: corrigido (LOG 27). Os 4 diagramas renderizam.
+
 ## Pendências de conteúdo para decisão humana
 
 Nenhuma falha. Riscos residuais conhecidos, que não são falhas:

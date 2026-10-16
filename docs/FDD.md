@@ -196,7 +196,7 @@ sequenceDiagram
         W->>DB: UPDATE status=PROCESSING (ids do lote)
         loop para cada evento, em ordem de createdAt
             W->>DB: carrega webhook_endpoint (ativo? secret)
-            W->>W: corpo = JSON(payload); checa 64 KB; X-Signature = HMAC-SHA256(secret, corpo)
+            W->>W: corpo = JSON(payload) · checa 64 KB · X-Signature = HMAC-SHA256(secret, corpo)
             W->>CL: POST url (timeout 10 s)
             alt 2xx
                 W->>DB: status=DELIVERED, deliveredAt, attempts+1 · INSERT webhook_deliveries(success)

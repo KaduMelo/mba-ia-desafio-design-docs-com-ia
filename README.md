@@ -141,7 +141,7 @@ gh pr merge --merge e depois git switch main && git pull.
 
 ## Iterações e ajustes
 
-Foram **8 ciclos principais de revisão**, um por fase de produção (do inventário ao README), e um checklist final, com **26 ajustes
+Foram **8 ciclos principais de revisão**, um por fase de produção (do inventário ao README), e um checklist final, com **27 ajustes
 registrados** em [`processo/LOG-ITERACOES.md`](processo/LOG-ITERACOES.md). Os números entre colchetes abaixo
 são as entradas do LOG.
 
