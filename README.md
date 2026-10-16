@@ -51,7 +51,8 @@ por um Pull Request no fork. O histórico do git mostra cada etapa.
 | 4 | PRD | [PR #4](https://github.com/KaduMelo/mba-ia-desafio-design-docs-com-ia/pull/4) |
 | 5 | Tracker (gerado por script e validado) | [PR #5](https://github.com/KaduMelo/mba-ia-desafio-design-docs-com-ia/pull/5) |
 | 6 | Revisão cruzada ([`processo/REVISAO.md`](processo/REVISAO.md)) e correções | [PR #6](https://github.com/KaduMelo/mba-ia-desafio-design-docs-com-ia/pull/6) |
-| 7 | Este README | `docs/fase-7-readme` |
+| 7 | Este README | [PR #7](https://github.com/KaduMelo/mba-ia-desafio-design-docs-com-ia/pull/7) |
+| 8 | Checklist final com os critérios de aceite do enunciado ([`processo/CHECKLIST-FINAL.md`](processo/CHECKLIST-FINAL.md)) | `docs/fase-8-checklist` |
 
 **Como organizei a interação com a IA:**
 
@@ -140,7 +141,7 @@ gh pr merge --merge e depois git switch main && git pull.
 
 ## Iterações e ajustes
 
-Foram **7 ciclos principais de revisão**, um por fase (do inventário à revisão cruzada), com **24 ajustes
+Foram **8 ciclos principais de revisão**, um por fase de produção (do inventário ao README), e um checklist final, com **26 ajustes
 registrados** em [`processo/LOG-ITERACOES.md`](processo/LOG-ITERACOES.md). Os números entre colchetes abaixo
 são as entradas do LOG.
 
@@ -206,6 +207,7 @@ são as entradas do LOG.
 │   ├── INVENTARIO.md         ← fonte única de verdade extraída da reunião e do código
 │   ├── LOG-ITERACOES.md      ← cada ajuste feito sobre o que a IA gerou
 │   ├── REVISAO.md            ← revisão cruzada contra o checklist do enunciado
+│   ├── CHECKLIST-FINAL.md    ← conferência final, item a item, com evidência
 │   └── scripts/              ← gerador e validadores (Tracker e critérios de aceite)
 └── src/ prisma/ tests/       ← código original (não alterado)
 ```
